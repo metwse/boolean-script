@@ -19,17 +19,19 @@ void b_buffer_init(struct b_buffer *buf, b_umem cap) {
 /* sets buffer capacity to 0 */
 void b_buffer_reset(struct b_buffer *buf) {
 	if (buf->cap) {
-		buf->cap = 0;
 		free(buf->b);
+
+		buf->b = NULL;
+		buf->cap = 0;
 	}
 }
 
 void b_buffer_resize(struct b_buffer *buf, b_umem cap) {
-	if (cap == 0) {
+	if (cap == 0)
 		return b_buffer_reset(buf);
-	}
 
-	buf->b = realloc(buf->b, cap);
+	buf->b = buf->cap == 0 ? malloc(cap) : realloc(buf->b, cap);
+	buf->cap = cap;
 
 	b_assert_expr("realloc should not return NULL", buf->b);
 }
