@@ -16,10 +16,10 @@
 /**
  * 'b_mem' is a signed integer big enough to count the total memory used by BS.
  * 'b_umem' is a corresponding unsigned type. Usually, 'ptrdiff_t' should work,
- * but we use 'long' for 16-bit machines.
+ * but we use 'long long' for 32-bit machines.
  */
-typedef unsigned long b_umem;
-typedef long b_mem;
+typedef unsigned long long b_umem;
+typedef long long b_mem;
 
 /* chars used as small naturals (so that 'char' is reserved for characters) */
 typedef unsigned char b_ubyte;
@@ -31,11 +31,11 @@ typedef char b_byte;
 #ifdef B_ASSERT
 #include <assert.h>
 
-#define b_assert_expr(c) assert(c)
-#define b_assert(c) c
+#define b_assert_expr(expect, c) assert(c)
+#define b_assert(expect, c) c
 #else
-#define b_assert_expr(c) ((void) 0)
-#define b_assert(c) ((void) 0)
+#define b_assert_expr(expect, c) ((void) 0)
+#define b_assert(expect, c) ((void) 0)
 #endif
 
 /* type casts (a macro highlights casts in the code) */

@@ -45,5 +45,13 @@ struct b_token {
 	enum b_token_type token;
 };
 
+/**
+ * @brief Lexer state
+ *
+ * State of the scanner plus state of the parser.
+ */
+struct b_lex {
+};
+
 
 #endif
