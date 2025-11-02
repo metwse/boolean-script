@@ -10,7 +10,7 @@ BIN_DIR=bin
 TARGET=bs
 
 # no need to change anything below this line
-OBJS=bio.o bmem.o
+OBJS=bio.o bmem.o blex.o bparser.o
 
 TESTS=bmem
 
