@@ -1,52 +1,12 @@
 #include "../bdef.h"
 #include "../bio.h"
-#include "../bmem.h"
 
-#include <assert.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#include <string.h>
 #include <time.h>
 
+#include "mock_input_stream.h"
 
-struct streamreader_state {
-	// position in the stream
-	b_umem p;
-	b_umem len;
-	const char *stream;
-};
-
-
-b_umem streamreader(struct b_buffer *buf, void *state_) {
-	struct streamreader_state *state = state_;
-
-	b_umem chunk_size = rand() % 1024 + 1;
-
-	if (state->p + chunk_size > state->len)
-		chunk_size = state->len - state->p;
-
-	if (chunk_size == 0)
-		return 0;
-
-	b_buffer_with_cap(buf, chunk_size);
-	memcpy(buf->b, state->stream + state->p, chunk_size);
-
-	state->p += chunk_size;
-
-	return chunk_size;
-}
-
-struct streamreader_state *new_state(const char *stream, b_umem len) {
-	struct streamreader_state *state = malloc(
-		sizeof(struct streamreader_state)
-	);
-
-	state->p = 0;
-	state->len = len;
-	state->stream = stream;
-
-	return state;
-}
 
 void test(b_umem stream_size, b_umem read_limit) {
 	struct bio bio;
@@ -58,7 +18,7 @@ void test(b_umem stream_size, b_umem read_limit) {
 		// fill random data
 		stream[i] = rand() % 254 + 1;
 
-	bio_init(&bio, streamreader, new_state(stream, stream_size));
+	bio_init(&bio, mock_input_stream, new_mock_input_stream_state(stream, stream_size));
 
 	// null-terminated read output
 	char *collect = malloc(sizeof(char) * (stream_size + 1));
