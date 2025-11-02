@@ -1,7 +1,8 @@
-Unicode font used in this file are math regular italic.
+Unicode font used in this file is math regular italic. \
 𝜖 used for empty leaves.
 
 
+```
 GENERAL
     /* bit literal */
     𝑏𝑖𝑡 ⟶ 0
@@ -14,8 +15,8 @@ GENERAL
 
     𝑡𝑦 ⟶ bool
          | vec < 𝑝𝑜𝑠𝑖𝑡𝑖𝑣𝑒_𝑖𝑛𝑡 >
-
-
+```
+```
 EXPRESSIONS
     /* expression */
     𝑒𝑥𝑝𝑟 ⟶ 𝑒𝑥𝑝𝑟 + 𝑡𝑒𝑟𝑚
@@ -40,8 +41,8 @@ EXPRESSIONS
 
     𝑝𝑎𝑟𝑎𝑚𝑠 ⟶ 𝑝𝑎𝑟𝑎𝑚𝑠, 𝑝𝑎𝑟𝑎𝑚
            | 𝑝𝑎𝑟𝑎𝑚
-
-
+```
+```
 STATEMENTS
     /**
      * statement
@@ -70,3 +71,4 @@ STATEMENTS
 
     𝑑𝑒𝑙𝑖𝑚 ⟶ ;
           | no_escape_newline
+```

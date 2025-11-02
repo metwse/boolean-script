@@ -1,12 +1,21 @@
 # Boolean Script
 Embriyonic boolean algebra evaluation virtual machine
 
+See [grammar.md](grammar.md) for language definition.
+
 ```
 expr half_adder(a, b) -> (sum, carry) {
     sum = (a + b) * (a * b)'
     carry = a * b
 }
 ```
+
+## `contribute -Wai-slop`
+<img width="96" height="96" alt="no-ai-slop" align="right" src="https://github.com/user-attachments/assets/bca16d5a-a6fe-4cbf-b41f-1176e000cff2" />
+
+Contributions are welcome! Please check our
+[Code of Conduct](http://github.com/metwse/code-of-conduct) before submitting
+pull requests.
 
 ## Future Plans
 HDL-like features:
@@ -22,15 +31,15 @@ expr full_adder(a, b, cin) -> (sum, cout) {
 }
 
 sync {
-    vector[4] reg = [0, 0, 0, 0]
+    vec<4> cnt = [0, 0, 0, 0]
 
     @clk {
-        reg0, c0 = full_adder(reg[0], 1, 0)
-        reg1, c1 = full_adder(reg[1], 0, c0)
-        reg2, c2 = full_adder(reg[2], 0, c1)
-        reg3, c3 = full_adder(reg[3], 0, c2)
+        cnt0, c0 = full_adder(cnt[0], 1, 0)
+        cnt1, c1 = full_adder(cnt[1], 0, c0)
+        cnt2, c2 = full_adder(cnt[2], 0, c1)
+        cnt3, c3 = full_adder(cnt[3], 0, c2)
 
-        reg = [reg0, reg1, reg2, reg3]
+        cnt = [cnt0, cnt1, cnt2, cnt3]
     }
 }
 ```
