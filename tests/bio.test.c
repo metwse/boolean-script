@@ -8,7 +8,8 @@
 #include "mock_input_stream.h"
 
 
-void test(b_umem stream_size, b_umem read_limit) {
+void test(b_umem stream_size, b_umem read_limit)
+{
 	struct bio bio;
 
 	// initial data
@@ -18,7 +19,8 @@ void test(b_umem stream_size, b_umem read_limit) {
 		// fill random data
 		stream[i] = rand() % 254 + 1;
 
-	bio_init(&bio, mock_input_stream, new_mock_input_stream_state(stream, stream_size));
+	bio_init(&bio, mock_input_stream,
+		 new_mock_input_stream_state(stream, stream_size));
 
 	// null-terminated read output
 	char *collect = malloc(sizeof(char) * (stream_size + 1));

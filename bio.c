@@ -21,6 +21,9 @@ void *bio_destroy(struct bio *bio)
 {
 	b_buffer_reset(&bio->buf);
 
+	if (bio->prev_buf)
+		free(bio->prev_buf);
+
 	return bio->reader_state;
 }
 
