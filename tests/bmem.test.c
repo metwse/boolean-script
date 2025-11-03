@@ -16,12 +16,12 @@ int main()
 		b_buffer_setall(buf, i);
 
 		for (int j = 0; j < i; j++) {
-			b_assert_expr("", b_buffer_at(buf, j) == i);
+			b_assert_expr(b_buffer_at(buf, j) == i, "");
 			b_buffer_set(buf, j, 255 - j);
 		}
 
 		for (int j = 0; j < i; j++)
-			b_assert_expr("", b_buffer_at(buf, j) == 255 - j);
+			b_assert_expr(b_buffer_at(buf, j) == 255 - j, "");
 
 		b_buffer_reset(&buf);
 

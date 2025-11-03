@@ -30,7 +30,7 @@ void b_buffer_resize(struct b_buffer *, b_umem cap);
 
 static inline b_ubyte b_buffer_at(struct b_buffer buf, b_umem i)
 {
-	b_assert_expr("buffer out of boundary", i < buf.cap);
+	b_assert_expr(i < buf.cap, "buffer out of boundary");
 
 	return buf.b[i];
 }
@@ -42,7 +42,7 @@ static inline char b_buffer_char_at(struct b_buffer buf, b_umem i)
 
 static inline void b_buffer_set(struct b_buffer buf, b_umem i, b_ubyte b)
 {
-	b_assert_expr("buffer out of boundary", i < buf.cap);
+	b_assert_expr(i < buf.cap, "buffer out of boundary");
 
 	buf.b[i] = b;
 }

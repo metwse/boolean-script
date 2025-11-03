@@ -83,14 +83,18 @@ int main()
 	for (b_umem i = 0; i < sizeof(tokens) / sizeof(struct b_token); i++) {
 		struct b_token lexeme = b_lex_next(&lex);
 
-		b_assert_expr("lexeme error", lexeme.token == tokens[i].token);
+		b_assert_expr(lexeme.token == tokens[i].token, "lexeme error");
 
 		if (lexeme.token == TK_POSITIVE_INT) {
-			b_assert_expr("int parse error",
-				lexeme.info.positive_integer == tokens[i].info.positive_integer);
+			b_assert_expr(
+				lexeme.info.positive_integer == tokens[i].info.positive_integer,
+				"int parse error"
+			);
 		} else if (lexeme.token == TK_IDENT) {
-			b_assert_expr("int parse error",
-				strcmp(lexeme.info.identifier, tokens[i].info.identifier) == 0);
+			b_assert_expr(
+				strcmp(lexeme.info.identifier, tokens[i].info.identifier) == 0,
+				"int parse error"
+			);
 
 			free(lexeme.info.identifier);
 		}

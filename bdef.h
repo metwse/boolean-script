@@ -30,12 +30,21 @@ typedef char b_byte;
  */
 #ifdef B_ASSERT
 #include <assert.h>
+#include <stdio.h>  // IWYU pragma: export
 
-#define b_assert_expr(expect, c) assert(c)
-#define b_assert(expect, c) c
+#define bI_assert_stringify_detail(a) #a
+#define bI_assert_stringify(a) bI_assert_stringify_detail(a)
+
+#define b_assert_expr(c, fmt, ...) \
+	if (!(c)) { \
+		fprintf(stderr, "["__FILE__ ":" bI_assert_stringify(__LINE__) "] " fmt "\n"\
+			__VA_OPT__(,)__VA_ARGS__); \
+		assert(c); \
+	}
+#define b_assert(c) c
 #else
-#define b_assert_expr(expect, c) ((void) 0)
-#define b_assert(expect, c) ((void) 0)
+#define b_assert_expr(c, ...) ((void) 0)
+#define b_assert(c) ((void) 0)
 #endif
 
 /* type casts (a macro highlights casts in the code) */

@@ -35,15 +35,15 @@ void test(b_umem stream_size, b_umem read_limit)
 		if (!data)
 			break;
 
-		b_assert_expr("data is not null-terminated",
-			      strlen(data) <= wants_read);
+		b_assert_expr(strlen(data) <= wants_read,
+			      "data is not null-terminated");
 
 		strcpy(collect_cursor, data);
 		collect_cursor += wants_read;
 	}
 
-	b_assert_expr("collected data differs from initial data",
-		      memcmp(collect, stream, stream_size) == 0);
+	b_assert_expr(memcmp(collect, stream, stream_size) == 0,
+		      "collected data differs from initial data");
 
 	free(collect);
 	free(stream);
