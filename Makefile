@@ -1,44 +1,54 @@
 CC=gcc
-CFLAGS=-O2 -Wall -Wextra
 RM=rm -rf
 
-# test flags
-TFLAGS=-O0 -g3 -Wall -Wextra -DB_ASSERT
+CFLAGS=-O2 -Wall -Wextra
+# debug flags
+DFLAGS=-O0 -g3 -Wall -Wextra -DB_ASSERT
+# test flags, added to the debug flags
+TFLAGS=--coverage
 
 BIN_DIR=bin
-
 TARGET=bs
 
-# no need to change anything below this line
 OBJS=bio.o bmem.o blex.o bparser.o
+TESTS=bmem bio blex
 
-TESTS=bmem
-
-ifdef DEBUG
-CFLAGS=$(TFLAGS)
-endif
+# no need to change anything below this line
+TEST:=$(filter tests bin/%.test, $(MAKECMDGOALS))
 
 ifdef ASSERTIONS
 CFLAGS=-DB_ASSERT $(CFLAGS)
 endif
 
+ifdef DEBUG
+CFLAGS=$(DFLAGS)
+endif
 
-$(BIN_DIR)/$(TARGET): $(OBJS) bs.o | $(BIN_DIR)
-	$(CC) $(CFLAGS) -o $@ $^
+ifdef TEST
+CFLAGS=$(DFLAGS) $(TFLAGS)
+endif
+
+
+$(BIN_DIR)/$(TARGET): $(OBJS) $(TARGET).o | $(BIN_DIR)
+	$(CC) $(CFLAGS)      -o $@ $^
 
 $(BIN_DIR)/%.test: $(OBJS) tests/%.test.o | $(BIN_DIR)
-	$(CC) $(TFLAGS) -o $@ $^
+	$(CC) $(CFLAGS)      -o $@ $^
 
+.PHONY: tests clean
+
+tests: $(foreach test,$(TESTS),$(BIN_DIR)/$(test).test) | $(BIN_DIR)
+	@:
 
 clean:
-	$(RM) $(wildcard b*.o) \
-		$(BIN_DIR)
-
-.PHONY: clean
+	$(RM) $(BIN_DIR) \
+		$(wildcard b*.o) $(wildcard tests/b*.o) \
+		$(wildcard b*.gcno) $(wildcard tests/b*.gcno) \
+		$(wildcard b*.gcda) $(wildcard tests/b*.gcda)
 
 $(foreach target,$(target),$(shell $(CC) -MM b*.c))
 
+.SECONDARY:
 $(foreach test_target,$(test_target),$(shell $(CC) -MM tests/b*.c))
 
-$(BIN_DIR):
-	mkdir $@
+$(BIN_DIR): ; mkdir $@
