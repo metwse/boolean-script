@@ -12,23 +12,23 @@ void b_lex_init(struct b_lex *lex)
 	lex->hold_char = 0;
 }
 
-void *b_lex_destroy(struct b_lex *lex)
+void *b_lex_clearinput(struct b_lex *lex)
 {
-	if (lex->bio)
-		return bio_destroy(lex->bio);
+	void *state = NULL;
 
-	return NULL;
+	lex->hold_char = 0;
+	if (lex->bio)
+		state = bio_destroy(lex->bio);
+
+	lex->bio = NULL;
+
+	return state;
 }
 
 void *b_lex_setinput(struct b_lex *lex, struct bio *bio)
 {
-	void *state = NULL;
-
-	if (lex->bio)
-		state = bio_destroy(lex->bio);
-
+	void *state = b_lex_clearinput(lex);
 	lex->bio = bio;
-	lex->hold_char = 0;
 
 	return state;
 }

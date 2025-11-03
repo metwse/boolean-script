@@ -86,7 +86,7 @@ struct b_lex {
 void b_lex_init(struct b_lex *);
 
 /* returns the state of input stream  */
-void *b_lex_destroy(struct b_lex *);
+void *b_lex_clearinput(struct b_lex *);
 
 /* returns the state of previous input */
 void *b_lex_setinput(struct b_lex *, struct bio *);

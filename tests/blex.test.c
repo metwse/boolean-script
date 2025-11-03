@@ -1,3 +1,4 @@
+#include "../bdef.h"
 #include "../bio.h"
 #include "../blex.h"
 
@@ -6,11 +7,6 @@
 
 #include "mock_input_stream.h"
 
-
-const char *tokenstream =
-	"a = 1;\n"
-	"bool b = a'; c = a * b;\n"
-	"vec<3> d = [(b * 0)', 1 * (0 + 1), (1 + 0) * 1];";
 
 const struct b_token tokens[] = {
 	{ .token = TK_IDENT, .info.identifier = "a", },
@@ -67,21 +63,18 @@ const struct b_token tokens[] = {
 	{ .token = NOTOKEN },
 };
 
-int main()
+void consume_tokenstream(struct b_lex *lex, const char *tokenstream)
 {
-	struct b_lex lex;
 	struct bio bio;
-
-	b_lex_init(&lex);
 
 	bio_init(&bio, mock_input_stream,
 		 new_mock_input_stream_state(tokenstream,
 					     strlen(tokenstream)));
 
-	b_lex_setinput(&lex, &bio);
+	b_lex_setinput(lex, &bio);
 
 	for (b_umem i = 0; i < sizeof(tokens) / sizeof(struct b_token); i++) {
-		struct b_token lexeme = b_lex_next(&lex);
+		struct b_token lexeme = b_lex_next(lex);
 
 		b_assert_expr(lexeme.token == tokens[i].token, "lexeme error");
 
@@ -100,5 +93,47 @@ int main()
 		}
 	}
 
-	free(bio_destroy(&bio));
+	free(b_lex_clearinput(lex));
+}
+
+void test_invalid(struct b_lex *lex, const char *invalid_tokenstream)
+{
+	struct bio bio;
+
+	bio_init(&bio, mock_input_stream,
+		 new_mock_input_stream_state(invalid_tokenstream,
+					     strlen(invalid_tokenstream)));
+
+	free(b_lex_setinput(lex, &bio));
+
+	b_assert_expr(b_lex_next(lex).token == NOTOKEN,
+		      "expected notoken due to invalid token")
+
+	free(b_lex_clearinput(lex));
+}
+
+int main()
+{
+	struct b_lex lex;
+
+	b_lex_init(&lex);
+
+	const char *tokenstream =
+		"a = 1;\n"
+		"bool b = a'; c = a * b;\n"
+		"vec<3> d = [(b * 0)', 1 * (0 + 1), (1 + 0) * 1];";
+
+	const char *invalid_tokenstreams[] = {
+		"long_identifier_aaaaaaaaaaaaaaaaa also this tests memory leak in terminated streams",
+		"123457890",
+		"ınvâlıd"
+	};
+
+
+	for (int _fuzz = 0; _fuzz < 4; _fuzz++)
+		consume_tokenstream(&lex, tokenstream);
+
+
+	for (b_umem i = 0; i < sizeof(invalid_tokenstreams) / sizeof(char *); i++)
+		test_invalid(&lex, invalid_tokenstreams[i]);
 }
