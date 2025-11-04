@@ -11,23 +11,26 @@
 #include "bdef.h"
 
 
+/** @brief zero-cost buffer wrapper */
 struct b_buffer {
-	b_ubyte *b;
-	b_umem cap;
+	b_ubyte *b /** underlying buffer */;
+	b_umem cap /** buffer capacity */;
 };
 
 
-/* initializes a empty buffer */
+/** @brief initializes a empty buffer */
 void b_buffer_init(struct b_buffer *);
 
-/* initializes a buffer with given cap */
+/** @brief initializes a buffer with given cap */
 void b_buffer_with_cap(struct b_buffer *, b_umem cap);
 
-/* sets buffer capacity to 0 */
+/** @brief sets buffer capacity to 0 */
 void b_buffer_reset(struct b_buffer *);
 
+/** @brief resizes underlying buffer */
 void b_buffer_resize(struct b_buffer *, b_umem cap);
 
+/** @brief element at, with boundary checks */
 static inline b_ubyte b_buffer_at(struct b_buffer buf, b_umem i)
 {
 	b_assert_expr(i < buf.cap, "buffer out of boundary");
@@ -35,11 +38,13 @@ static inline b_ubyte b_buffer_at(struct b_buffer buf, b_umem i)
 	return buf.b[i];
 }
 
+/** @brief element at (casting to char), with boundary checks */
 static inline char b_buffer_char_at(struct b_buffer buf, b_umem i)
 {
 	return (char) b_buffer_at(buf, i);
 }
 
+/** @brief reference to element at, with boundary checks */
 static inline void b_buffer_set(struct b_buffer buf, b_umem i, b_ubyte b)
 {
 	b_assert_expr(i < buf.cap, "buffer out of boundary");
@@ -47,6 +52,7 @@ static inline void b_buffer_set(struct b_buffer buf, b_umem i, b_ubyte b)
 	buf.b[i] = b;
 }
 
+/** @brief sets all elements to given byte */
 static inline void b_buffer_setall(struct b_buffer buf, b_ubyte b)
 {
 	for (b_umem i = 0; i < buf.cap; i++)

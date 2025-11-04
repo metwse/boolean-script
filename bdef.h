@@ -11,24 +11,12 @@
 #include <stddef.h>
 
 
+/** maximum of two nums */
 #define b_max(a, b) ((a) > (b) ? (a) : (b))
-#define b_numbits(t) (sizeof(t) * CHAR_BIT)
 
-/**
- * 'b_mem' is a signed integer big enough to count the total memory used by BS.
- * 'b_umem' is a corresponding unsigned type. Usually, 'ptrdiff_t' should work,
- * but we use 'long long' for 32-bit machines.
- */
-typedef unsigned long long b_umem;
-typedef long long b_mem;
+/** type casts (a macro highlights casts in the code) */
+#define cast(t, exp)	((t) (exp))
 
-/* chars used as small naturals (so that 'char' is reserved for characters) */
-typedef unsigned char b_ubyte;
-typedef char b_byte;
-
-/**
- * Internal assertions for in-house debugging
- */
 #ifdef B_ASSERT
 #include <assert.h>
 #include <stdio.h>  // IWYU pragma: export
@@ -44,12 +32,31 @@ typedef char b_byte;
 	}
 #define b_assert(c) c
 #else
+/** @brief internal assertions for in-house debugging */
 #define b_assert_expr(c, ...) ((void) 0)
+/** @brief assertion code that can be disabled with a flag */
 #define b_assert(c) ((void) 0)
 #endif
 
-/* type casts (a macro highlights casts in the code) */
-#define cast(t, exp)	((t) (exp))
+
+/**
+ * @brief 'b_mem' is a signed integer big enough to count the total memory used
+ * by BS.
+ */
+typedef unsigned long long b_umem;
+/**
+ * @brief 'b_umem' is the corresponding unsigned type to `b_mem`. Usually,
+ * 'ptrdiff_t' should work, but we use 'long long' for 32-bit machines.
+ */
+typedef long long b_mem;
+
+/**
+ * @brief chars used as small naturals (so that 'char' is reserved for
+ * characters)
+ */
+typedef unsigned char b_ubyte;
+/** @brief 'b_ubyte' is the corresponding unsigned type to `b_byte`. */
+typedef char b_byte;
 
 
 #endif

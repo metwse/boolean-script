@@ -12,33 +12,41 @@
 #include "bmem.h"
 
 
-#define B_EOF (-1)
-
+/**
+ * A trait in function form that wraps a token stream input, reads it into a
+ * buffer.
+ *
+ * @param[additional_data] Auxiliary state storage for underlying buffer.
+ *
+ * @returns number of read bytes
+ */
 typedef b_umem (*bio_reader)(struct b_buffer *buf, void *additional_data);
 
+/** @brief buffered io */
 struct bio {
-	// position in the `buf`
+	/** position in the `buf` */
 	b_umem p;
 
-	// If null-termination of a slice replaces char in the buffer, the char
-	// will be stored in this field to read next chunk.
+	/**
+	 * If null-termination of a slice replaces char in the buffer, the char
+	 * will be stored in this field to read next chunk.
+	 */
 	char hold_char;
 
-	b_byte *prev_buf;
-	struct b_buffer buf;
+	b_byte *prev_buf /** buffer returned in previous read */;
+	struct b_buffer buf /** underlying buffer */;
 
-	// reader function
+	/** reader function */
 	bio_reader reader;
-	// Additional state for use in reader
+	/** @see bio_reader for details */
 	void *reader_state;
 };
 
 
+/** initializes a new bio */
 void bio_init(struct bio *, bio_reader reader_func, void *aux_data);
 
-/**
- * @returns the auxulary data of reader function.
- */
+/** @returns the auxiliary data of reader function. */
 void *bio_destroy(struct bio *);
 
 /**

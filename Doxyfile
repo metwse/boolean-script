@@ -1,0 +1,9 @@
+PROJECT_NAME           = "Boolean Script"
+OUTPUT_DIRECTORY       = "docs/"
+MARKDOWN_SUPPORT       = YES
+INPUT                  = .
+RECURSIVE              = YES
+USE_MDFILE_AS_MAINPAGE = ./README.md
+GENERATE_HTML          = YES
+GENERATE_LATEX         = NO
+QUIET                  = YES

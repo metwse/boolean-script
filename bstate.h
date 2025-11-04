@@ -10,7 +10,7 @@
 
 
 /**
- * Global interpreter state.
+ * @brief Global interpreter state.
  */
 struct b_state { };
 

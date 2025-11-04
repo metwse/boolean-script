@@ -35,13 +35,16 @@ $(BIN_DIR)/$(TARGET): $(OBJS) $(TARGET).o | $(BIN_DIR)
 $(BIN_DIR)/%.test: $(OBJS) tests/%.test.o | $(BIN_DIR)
 	$(CC) $(CFLAGS)      -o $@ $^
 
-.PHONY: tests clean
+.PHONY: tests clean docs
 
 tests: $(foreach test,$(TESTS),$(BIN_DIR)/$(test).test) | $(BIN_DIR)
 	@:
 
+docs:
+	doxygen
+
 clean:
-	$(RM) $(BIN_DIR) \
+	$(RM) $(BIN_DIR) docs \
 		$(wildcard b*.o) $(wildcard tests/b*.o) \
 		$(wildcard b*.gcno) $(wildcard tests/b*.gcno) \
 		$(wildcard b*.gcda) $(wildcard tests/b*.gcda)

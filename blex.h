@@ -14,6 +14,13 @@
 #include <stdbool.h>
 
 
+/** maximum valid identifier length */
+#define BLEX_MAX_IDENT_LEN 32
+
+/** maximum valid positive integer length */
+#define BLEX_MAX_POSITIVE_INT_LEN 10
+
+
 /* DO NOT CHANGE THE ORDER */
 static const char *const b_tokens[] = {
 	"<>" /* no more token */,
@@ -35,6 +42,7 @@ static const char *const b_tokens[] = {
 	"<positive-int>", "<ident>",
 };
 
+/** kind of a token */
 enum b_token_type {
 	NOTOKEN = 0,
 
@@ -53,14 +61,6 @@ enum b_token_type {
 	TK_POSITIVE_INT, TK_IDENT
 };
 
-#define b_isterminal(token) ((token) < TK_POSITIVE_INT)
-
-#define b_notok ((struct b_token) { .token = NOTOKEN })
-
-#define BLEX_MAX_IDENT_LEN 32
-
-#define BLEX_MAX_POSITIVE_INT_LEN 10
-
 
 /**
  * @brief Associated data with token.
@@ -68,21 +68,27 @@ enum b_token_type {
  * Extra information for a token.
  */
 union b_seminfo {
+	/** for `TK_POSITIVE_INT` */
 	b_umem positive_int;
+	/** for `TK_IDENT` */
 	char *ident;
 };
 
+/** @brief lexeme */
 struct b_token {
-	union b_seminfo info;
+	/** token kind */
 	enum b_token_type token;
+	/** additional token info, i.e. identifier name */
+	union b_seminfo info;
 };
 
-/* lexer result */
+/** @brief lexer error details */
 enum b_lex_result {
 	BLEXOK = 0,
-	BLEXE_IDENT_TOO_LONG, /* identifier longer than BLEX_MAX_IDENT_LEN */
-	BLEXE_INTEGER_TOO_LARGE, /* integer string longer than BLEX_MAX_POSITIVE_INT_LEN */
-	BLEXE_NO_MATCH, /* could not match token */
+	BLEXE_IDENT_TOO_LONG /** identifier longer than `BLEX_MAX_IDENT_LEN` */,
+	BLEXE_INTEGER_TOO_LARGE /** integer string longer than
+				    `BLEX_MAX_POSITIVE_INT_LEN` */,
+	BLEXE_NO_MATCH /** could not match token */,
 };
 
 /**
@@ -91,21 +97,22 @@ enum b_lex_result {
  * State of the lexeme scanner.
  */
 struct b_lex {
-	struct bio *bio; /* input stream */
-	char peek;
-	enum b_token_type lookahead;
+	struct bio *bio /** input stream */;
+	char peek /** a char that broke previous token */;
+	enum b_token_type lookahead /** field simple lookahead checking */;
 };
 
 
+/** initializes a new lexer */
 void b_lex_init(struct b_lex *);
 
-/* returns the state of input stream  */
+/** returns the state of the current input's stream  */
 void *b_lex_clearinput(struct b_lex *);
 
-/* returns the state of previous input */
+/** returns the state of previous input */
 void *b_lex_setinput(struct b_lex *, struct bio *);
 
-/* first matched token */
+/** first matched token */
 enum b_lex_result b_lex_next(struct b_lex *, struct b_token *);
 
 

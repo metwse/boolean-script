@@ -4,3 +4,4 @@
 compile_commands.json
 .cache/
 bin/
+docs/
