@@ -15,6 +15,7 @@ void b_lex_init(struct b_lex *lex)
 	lex->bio = NULL;
 	lex->peek = 0;
 	lex->lookahead = NOTOKEN;
+	lex->group_depth = 0;
 }
 
 void *b_lex_clearinput(struct b_lex *lex)
@@ -27,6 +28,7 @@ void *b_lex_clearinput(struct b_lex *lex)
 	lex->peek = 0;
 	lex->bio = NULL;
 	lex->lookahead = NOTOKEN;
+	lex->group_depth = 0;
 
 	return old_state;
 }
@@ -173,12 +175,44 @@ enum b_lex_result b_lex_next(struct b_lex *lex, struct b_token *out) {
 	enum b_lex_result res = simple_next(lex, out);
 
 	if (res == BLEXOK) {
+		// skip escaped newline
+		if (out->token == TK_ESCAPE) {
+			res = simple_next(lex, out);
+
+			if (res == BLEXOK && out->token == TK_NEWLINE)
+				return b_lex_next(lex, out);
+			else
+				return BLEXE_INVALID_ESCAPE_CHAR;
+		}
+
+		// parse 1 inside <> as positive int
 		if (lex->lookahead == TK_L_ANGLE_BRACKET) {
 			if (out->token == TK_TRUE) {
 				out->token = TK_POSITIVE_INT;
 				out->info.positive_int = 1;
 			}
 		}
+
+		// checkings for newline skipping
+		if (out->token == TK_L_ANGLE_BRACKET ||
+		    out->token == TK_L_BRACKET ||
+		    out->token == TK_L_PAREN)
+			lex->group_depth++;
+
+		if (out->token == TK_R_ANGLE_BRACKET ||
+		    out->token == TK_R_BRACKET ||
+		    out->token == TK_R_PAREN)
+			lex->group_depth--;
+
+		// overwrite newline with statement delim token if it is not in
+		// a token
+		if (out->token == TK_NEWLINE) {
+			if (lex->group_depth)
+				return b_lex_next(lex, out);
+			else
+				out->token = TK_STMT_DELIM;
+		}
+
 		lex->lookahead = out->token;
 	} else {
 		lex->lookahead = NOTOKEN;

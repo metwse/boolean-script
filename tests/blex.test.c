@@ -14,7 +14,7 @@ const struct b_token tokens[] = {
 	{ .token = TK_TRUE, },
 	{ .token = TK_STMT_DELIM, },
 
-	{ .token = TK_NEWLINE, },
+	// { .token = TK_NEWLINE, },
 
 
 	{ .token = TK_TY_BOOL, },
@@ -31,7 +31,7 @@ const struct b_token tokens[] = {
 	{ .token = TK_IDENT, .info.ident = "b", },
 	{ .token = TK_STMT_DELIM, },
 
-	{ .token = TK_NEWLINE, },
+	// { .token = TK_NEWLINE, },
 
 
 	{ .token = TK_TY_VEC, },
@@ -66,7 +66,7 @@ const struct b_token tokens[] = {
 	{ .token = TK_R_BRACKET },
 	{ .token = TK_STMT_DELIM },
 
-	{ .token = TK_NEWLINE, },
+	// { .token = TK_NEWLINE, },
 
 
 	{ .token = TK_TY_VEC, },
@@ -147,15 +147,16 @@ int main()
 	b_lex_init(&lex);
 
 	const char *tokenstream =
-		"long_identifier_aaaaaaaaaaaaaaaa = 1;\n"
-		"bool b = a'; c = a * b;\n"
-		"vec<3> d = [(b * 0)', 1 * (0 + 1), (1 + 0) * 1];\n"
-		"vec<1234567890> e; vec<1> f;";
+		"long_identifier_aaaaaaaaaaaaaaaa \\\n= 1;"
+		"bool b = a'\n c = a * \\\nb;"
+		"vec<3> d = [(b * 0\n)', 1 * (0 + 1), (1 + 0) * 1];"
+		"vec<1234567890> e\n vec<1\n> f;";
 
 	const char *invalid_tokenstreams[] = {
 		"long_identifier_aaaaaaaaaaaaaaaaa also this tests memory leak in terminated streams",
 		"12345678901",
-		"ınvâlıd"
+		"ınvâlıd",
+		"\\not newline",
 	};
 
 
@@ -166,4 +167,5 @@ int main()
 	test_invalid(&lex, invalid_tokenstreams[0], BLEXE_IDENT_TOO_LONG);
 	test_invalid(&lex, invalid_tokenstreams[1], BLEXE_INTEGER_TOO_LARGE);
 	test_invalid(&lex, invalid_tokenstreams[2], BLEXE_NO_MATCH);
+	test_invalid(&lex, invalid_tokenstreams[3], BLEXE_INVALID_ESCAPE_CHAR);
 }

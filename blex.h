@@ -86,6 +86,7 @@ enum b_lex_result {
 	BLEXE_IDENT_TOO_LONG /** identifier longer than `BLEX_MAX_IDENT_LEN` */,
 	BLEXE_INTEGER_TOO_LARGE /** integer string longer than
 				    `BLEX_MAX_POSITIVE_INT_LEN` */,
+	BLEXE_INVALID_ESCAPE_CHAR /** invalid escape charachter (backslash) */,
 	BLEXE_NO_MATCH /** could not match token */,
 };
 
@@ -98,6 +99,8 @@ struct b_lex {
 	struct bio *bio /** input stream */;
 	char peek /** a char that broke previous token */;
 	enum b_token_type lookahead /** field simple lookahead checking */;
+	/** depth of the parentheses, used for ignoring newline  */
+	b_umem group_depth;
 };
 
 
