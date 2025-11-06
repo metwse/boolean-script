@@ -4,6 +4,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 
 
 const b_mem MAX_TOKEN_LEN = b_max(BLEX_MAX_IDENT_LEN,

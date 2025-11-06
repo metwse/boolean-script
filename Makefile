@@ -1,9 +1,9 @@
 CC=gcc
 RM=rm -rf
 
-CFLAGS=-O2 -Wall -Wextra
+CFLAGS=-std=c99 -O2 -Wall -Wextra
 # debug flags
-DFLAGS=-O0 -g3 -Wall -Wextra -DB_ASSERT
+DFLAGS=-std=c99 -O0 -g3 -Wall -Wextra -DB_ASSERT
 # test flags, added to the debug flags
 TFLAGS=--coverage
 

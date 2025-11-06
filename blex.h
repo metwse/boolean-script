@@ -11,8 +11,6 @@
 #include "bdef.h"
 #include "bio.h"
 
-#include <stdbool.h>
-
 
 /** maximum valid identifier length */
 #define BLEX_MAX_IDENT_LEN 32
