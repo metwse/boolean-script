@@ -9,6 +9,7 @@
 #define BLEX_H
 
 #include "bdef.h"
+#include "bgrammar.h"
 #include "bio.h"
 
 
@@ -18,67 +19,6 @@
 /** maximum valid positive integer length */
 #define BLEX_MAX_POSITIVE_INT_LEN 10
 
-
-/* DO NOT CHANGE THE ORDER */
-static const char *const b_tokens[] = {
-	"<>" /* no more token */,
-
-	/* terminal symbols denoted by reserved words or symbols */
-	"0", "1",
-
-	/* 1-character tokens */
-	"+", "*", "'", ",", "=", ".",
-	"(", ")", "<", ">", "[", "]", "{", "}",
-
-	"\\", "\n", ";",
-
-	/* keywords and reserved words */
-	"bool", "vec",
-
-
-	/* non-terminal tokens */
-	"<positive-int>", "<ident>",
-};
-
-/** kind of a token */
-enum b_token_type {
-	NOTOKEN = 0,
-
-	TK_FALSE, TK_TRUE,
-
-	TK_OR, TK_AND, TK_INVOLUTION, TK_DELIM, TK_ASGN, TK_SUBSCRIPT,
-	TK_L_PAREN, TK_R_PAREN,
-	TK_L_ANGLE_BRACKET, TK_R_ANGLE_BRACKET,
-	TK_L_BRACKET, TK_R_BRACKET,
-	TK_L_CURLY, TK_R_CURLY,
-
-	TK_ESCAPE, TK_NEWLINE, TK_STMT_DELIM,
-
-	TK_TY_BOOL, TK_TY_VEC,
-
-	TK_POSITIVE_INT, TK_IDENT
-};
-
-
-/**
- * @brief Associated data with token.
- *
- * Extra information for a token.
- */
-union b_seminfo {
-	/** for `TK_POSITIVE_INT` */
-	b_umem positive_int;
-	/** for `TK_IDENT` */
-	char *ident;
-};
-
-/** @brief lexeme */
-struct b_token {
-	/** token kind */
-	enum b_token_type token;
-	/** additional token info, i.e. identifier name */
-	union b_seminfo info;
-};
 
 /** @brief lexer error details */
 enum b_lex_result {
@@ -98,7 +38,7 @@ enum b_lex_result {
 struct b_lex {
 	struct bio *bio /** input stream */;
 	char peek /** a char that broke previous token */;
-	enum b_token_type lookahead /** field simple lookahead checking */;
+	enum btk_type lookahead /** field simple lookahead checking */;
 	/** depth of the parentheses, used for ignoring newline  */
 	b_umem group_depth;
 };
@@ -114,7 +54,7 @@ void *b_lex_clearinput(struct b_lex *);
 void *b_lex_setinput(struct b_lex *, struct bio *);
 
 /** first matched token */
-enum b_lex_result b_lex_next(struct b_lex *, struct b_token *);
+enum b_lex_result b_lex_next(struct b_lex *, struct btoken *);
 
 
 #endif

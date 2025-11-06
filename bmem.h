@@ -41,7 +41,7 @@ static inline b_ubyte b_buffer_at(struct b_buffer buf, b_umem i)
 /** @brief element at (casting to char), with boundary checks */
 static inline char b_buffer_char_at(struct b_buffer buf, b_umem i)
 {
-	return (char) b_buffer_at(buf, i);
+	return cast(char, b_buffer_at(buf, i));
 }
 
 /** @brief reference to element at, with boundary checks */

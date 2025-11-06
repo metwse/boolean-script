@@ -1,4 +1,5 @@
 #include "../bdef.h"
+#include "../bgrammar.h"
 #include "../bio.h"
 #include "../blex.h"
 
@@ -8,82 +9,82 @@
 #include "mock_input_stream.h"
 
 
-const struct b_token tokens[] = {
-	{ .token = TK_IDENT, .info.ident = "long_identifier_aaaaaaaaaaaaaaaa", },
-	{ .token = TK_ASGN, },
-	{ .token = TK_TRUE, },
-	{ .token = TK_STMT_DELIM, },
+const struct btoken tokens[] = {
+	{ .ty = BTK_IDENT, .info.ident = "long_identifier_aaaaaaaaaaaaaaaa", },
+	{ .ty = BTK_ASGN, },
+	{ .ty = BTK_TRUE, },
+	{ .ty = BTK_STMT_DELIM, },
 
-	// { .token = TK_NEWLINE, },
-
-
-	{ .token = TK_TY_BOOL, },
-	{ .token = TK_IDENT, .info.ident = "b", },
-	{ .token = TK_ASGN, },
-	{ .token = TK_IDENT, .info.ident = "a", },
-	{ .token = TK_INVOLUTION, },
-	{ .token = TK_STMT_DELIM, },
-
-	{ .token = TK_IDENT, .info.ident = "c", },
-	{ .token = TK_ASGN, },
-	{ .token = TK_IDENT, .info.ident = "a", },
-	{ .token = TK_AND, },
-	{ .token = TK_IDENT, .info.ident = "b", },
-	{ .token = TK_STMT_DELIM, },
-
-	// { .token = TK_NEWLINE, },
+	// { .ty = BTK_NEWLINE, },
 
 
-	{ .token = TK_TY_VEC, },
-	{ .token = TK_L_ANGLE_BRACKET, },
-		{ .token = TK_POSITIVE_INT, .info.positive_int = 3, },
-	{ .token = TK_R_ANGLE_BRACKET, },
-	{ .token = TK_IDENT, .info.ident = "d", },
-	{ .token = TK_ASGN, },
-	{ .token = TK_L_BRACKET },
-		{ .token = TK_L_PAREN },
-			{ .token = TK_IDENT, .info.ident = "b", },
-			{ .token = TK_AND, },
-			{ .token = TK_FALSE, },
-		{ .token = TK_R_PAREN },
-		{ .token = TK_INVOLUTION },
-	{ .token = TK_DELIM },
-		{ .token = TK_TRUE },
-		{ .token = TK_AND },
-		{ .token = TK_L_PAREN },
-			{ .token = TK_FALSE },
-			{ .token = TK_OR },
-			{ .token = TK_TRUE },
-		{ .token = TK_R_PAREN },
-	{ .token = TK_DELIM },
-		{ .token = TK_L_PAREN },
-			{ .token = TK_TRUE },
-			{ .token = TK_OR },
-			{ .token = TK_FALSE },
-		{ .token = TK_R_PAREN },
-		{ .token = TK_AND },
-		{ .token = TK_TRUE },
-	{ .token = TK_R_BRACKET },
-	{ .token = TK_STMT_DELIM },
+	{ .ty = BTK_TY_BOOL, },
+	{ .ty = BTK_IDENT, .info.ident = "b", },
+	{ .ty = BTK_ASGN, },
+	{ .ty = BTK_IDENT, .info.ident = "a", },
+	{ .ty = BTK_INVOLUTION, },
+	{ .ty = BTK_STMT_DELIM, },
 
-	// { .token = TK_NEWLINE, },
+	{ .ty = BTK_IDENT, .info.ident = "c", },
+	{ .ty = BTK_ASGN, },
+	{ .ty = BTK_IDENT, .info.ident = "a", },
+	{ .ty = BTK_AND, },
+	{ .ty = BTK_IDENT, .info.ident = "b", },
+	{ .ty = BTK_STMT_DELIM, },
+
+	// { .ty = BTK_NEWLINE, },
 
 
-	{ .token = TK_TY_VEC, },
-	{ .token = TK_L_ANGLE_BRACKET, },
-		{ .token = TK_POSITIVE_INT, .info.positive_int = 1234567890, },
-	{ .token = TK_R_ANGLE_BRACKET, },
-	{ .token = TK_IDENT, .info.ident = "e", },
-	{ .token = TK_STMT_DELIM },
+	{ .ty = BTK_TY_VEC, },
+	{ .ty = BTK_L_ANGLE_BRACKET, },
+		{ .ty = BTK_POSITIVE_INT, .info.positive_int = 3, },
+	{ .ty = BTK_R_ANGLE_BRACKET, },
+	{ .ty = BTK_IDENT, .info.ident = "d", },
+	{ .ty = BTK_ASGN, },
+	{ .ty = BTK_L_BRACKET },
+		{ .ty = BTK_L_PAREN },
+			{ .ty = BTK_IDENT, .info.ident = "b", },
+			{ .ty = BTK_AND, },
+			{ .ty = BTK_FALSE, },
+		{ .ty = BTK_R_PAREN },
+		{ .ty = BTK_INVOLUTION },
+	{ .ty = BTK_DELIM },
+		{ .ty = BTK_TRUE },
+		{ .ty = BTK_AND },
+		{ .ty = BTK_L_PAREN },
+			{ .ty = BTK_FALSE },
+			{ .ty = BTK_OR },
+			{ .ty = BTK_TRUE },
+		{ .ty = BTK_R_PAREN },
+	{ .ty = BTK_DELIM },
+		{ .ty = BTK_L_PAREN },
+			{ .ty = BTK_TRUE },
+			{ .ty = BTK_OR },
+			{ .ty = BTK_FALSE },
+		{ .ty = BTK_R_PAREN },
+		{ .ty = BTK_AND },
+		{ .ty = BTK_TRUE },
+	{ .ty = BTK_R_BRACKET },
+	{ .ty = BTK_STMT_DELIM },
 
-	{ .token = TK_TY_VEC, },
-	{ .token = TK_L_ANGLE_BRACKET, },
-		{ .token = TK_POSITIVE_INT, .info.positive_int = 1, },
-	{ .token = TK_R_ANGLE_BRACKET, },
-	{ .token = TK_IDENT, .info.ident = "f", },
-	{ .token = TK_STMT_DELIM },
+	// { .ty = BTK_NEWLINE, },
 
-	{ .token = NOTOKEN },
+
+	{ .ty = BTK_TY_VEC, },
+	{ .ty = BTK_L_ANGLE_BRACKET, },
+		{ .ty = BTK_POSITIVE_INT, .info.positive_int = 1234567890, },
+	{ .ty = BTK_R_ANGLE_BRACKET, },
+	{ .ty = BTK_IDENT, .info.ident = "e", },
+	{ .ty = BTK_STMT_DELIM },
+
+	{ .ty = BTK_TY_VEC, },
+	{ .ty = BTK_L_ANGLE_BRACKET, },
+		{ .ty = BTK_POSITIVE_INT, .info.positive_int = 1, },
+	{ .ty = BTK_R_ANGLE_BRACKET, },
+	{ .ty = BTK_IDENT, .info.ident = "f", },
+	{ .ty = BTK_STMT_DELIM },
+
+	{ .ty = BTK_NOTOKEN },
 };
 
 void consume_tokenstream(struct b_lex *lex, const char *tokenstream)
@@ -96,18 +97,18 @@ void consume_tokenstream(struct b_lex *lex, const char *tokenstream)
 
 	b_lex_setinput(lex, &bio);
 
-	for (b_umem i = 0; i < sizeof(tokens) / sizeof(struct b_token); i++) {
-		struct b_token lexeme;
+	for (b_umem i = 0; i < sizeof(tokens) / sizeof(struct btoken); i++) {
+		struct btoken lexeme;
 		b_lex_next(lex, &lexeme);
 
-		b_assert_expr(lexeme.token == tokens[i].token, "lexeme error");
+		b_assert_expr(lexeme.ty == tokens[i].ty, "lexeme error");
 
-		if (lexeme.token == TK_POSITIVE_INT) {
+		if (lexeme.ty == BTK_POSITIVE_INT) {
 			b_assert_expr(
 				lexeme.info.positive_int == tokens[i].info.positive_int,
 				"int error"
 			);
-		} else if (lexeme.token == TK_IDENT) {
+		} else if (lexeme.ty == BTK_IDENT) {
 			b_assert_expr(
 				strcmp(lexeme.info.ident, tokens[i].info.ident) == 0,
 				"ident error"
@@ -131,7 +132,7 @@ void test_invalid(struct b_lex *lex, const char *invalid_tokenstream,
 
 	free(b_lex_setinput(lex, &bio));
 
-	struct b_token lexeme;
+	struct btoken lexeme;
 	enum b_lex_result res = b_lex_next(lex, &lexeme);
 
 	b_assert_expr(expected_fail == res,

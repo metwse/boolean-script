@@ -28,7 +28,8 @@ struct mock_input_stream_state {
 /** initializes a mock input stream from state */
 b_umem mock_input_stream(struct b_buffer *buf, void *state_)
 {
-	struct mock_input_stream_state *state = state_;
+	struct mock_input_stream_state *state =
+		cast(struct mock_input_stream_state *, state_);
 
 	b_umem chunk_size = rand() % 1024 + 1;
 
@@ -50,9 +51,8 @@ b_umem mock_input_stream(struct b_buffer *buf, void *state_)
 struct mock_input_stream_state *new_mock_input_stream_state(const char *buf,
 							    b_umem len)
 {
-	struct mock_input_stream_state *state = malloc(
-		sizeof(struct mock_input_stream_state)
-	);
+	struct mock_input_stream_state *state =
+		malloc(sizeof(struct mock_input_stream_state));
 
 	state->p = 0;
 	state->len = len;

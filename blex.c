@@ -1,6 +1,7 @@
 #include "bdef.h"
-#include "blex.h"
+#include "bgrammar.h"
 #include "bio.h"
+#include "blex.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -14,7 +15,7 @@ void b_lex_init(struct b_lex *lex)
 {
 	lex->bio = NULL;
 	lex->peek = 0;
-	lex->lookahead = NOTOKEN;
+	lex->lookahead = BTK_NOTOKEN;
 	lex->group_depth = 0;
 }
 
@@ -27,7 +28,7 @@ void *b_lex_clearinput(struct b_lex *lex)
 
 	lex->peek = 0;
 	lex->bio = NULL;
-	lex->lookahead = NOTOKEN;
+	lex->lookahead = BTK_NOTOKEN;
 	lex->group_depth = 0;
 
 	return old_state;
@@ -43,9 +44,9 @@ void *b_lex_setinput(struct b_lex *lex, struct bio *bio)
 }
 
 /* match next lexeme without lookahead filtering */
-enum b_lex_result simple_next(struct b_lex *lex, struct b_token *out)
+enum b_lex_result simple_next(struct b_lex *lex, struct btoken *out)
 {
-	out->token = NOTOKEN;
+	out->ty = BTK_NOTOKEN;
 
 	char token_string[MAX_TOKEN_LEN + 1];
 
@@ -81,10 +82,10 @@ enum b_lex_result simple_next(struct b_lex *lex, struct b_token *out)
 			}
 		}
 
-		for (int i = TK_OR; i <= TK_STMT_DELIM; i++)
-			if (input == b_tokens[i][0]) {
+		for (int i = BTK_OR; i <= BTK_STMT_DELIM; i++)
+			if (input == btokens[i][0]) {
 				if (token_len == 0) {
-					out->token = i;
+					out->ty = i;
 					return BLEXOK;
 				} else {
 					// One-character "punctuation" can
@@ -104,9 +105,9 @@ enum b_lex_result simple_next(struct b_lex *lex, struct b_token *out)
 		token_string[token_len] = input;
 		token_string[token_len + 1] = '\0';
 
-		for (int i = TK_TY_BOOL; i <= TK_TY_VEC; i++) {
-			if (strcmp(b_tokens[i], token_string) == 0) {
-				out->token = i;
+		for (int i = BTK_TY_BOOL; i <= BTK_TY_VEC; i++) {
+			if (strcmp(btokens[i], token_string) == 0) {
+				out->ty = i;
 				return BLEXOK;
 			}
 		}
@@ -132,8 +133,8 @@ enum b_lex_result simple_next(struct b_lex *lex, struct b_token *out)
 		}
 	}
 
-	if (token_len == 1 && token_string[0] == b_tokens[TK_FALSE][0]) {
-		out->token = TK_FALSE;
+	if (token_len == 1 && token_string[0] == btokens[BTK_FALSE][0]) {
+		out->ty = BTK_FALSE;
 		return BLEXOK;
 	}
 
@@ -142,13 +143,13 @@ enum b_lex_result simple_next(struct b_lex *lex, struct b_token *out)
 	// valid_ident variable is true for positive integers
 	if (token_len && valid_positive_int) {
 		// Bit "1" in subset of positive_integer tokens.
-		if (token_len == 1 && token_string[0] == b_tokens[TK_TRUE][0]) {
-			out->token = TK_TRUE;
+		if (token_len == 1 && token_string[0] == btokens[BTK_TRUE][0]) {
+			out->ty = BTK_TRUE;
 			return BLEXOK;
 		}
 
 		if (token_len <= BLEX_MAX_POSITIVE_INT_LEN) {
-			out->token = TK_POSITIVE_INT;
+			out->ty = BTK_POSITIVE_INT;
 			out->info.positive_int = strtoull(token_string,
 							  NULL, 10);
 			return BLEXOK;
@@ -160,7 +161,7 @@ enum b_lex_result simple_next(struct b_lex *lex, struct b_token *out)
 			char *ident = malloc(sizeof(char) * (token_len + 1));
 			memcpy(ident, token_string, token_len + 1 /* +1 for \0 */);
 
-			out->token = TK_IDENT;
+			out->ty = BTK_IDENT;
 			out->info.ident = ident;
 			return BLEXOK;
 		} else {
@@ -171,51 +172,51 @@ enum b_lex_result simple_next(struct b_lex *lex, struct b_token *out)
 	return BLEXE_NO_MATCH;
 }
 
-enum b_lex_result b_lex_next(struct b_lex *lex, struct b_token *out) {
+enum b_lex_result b_lex_next(struct b_lex *lex, struct btoken *out) {
 	enum b_lex_result res = simple_next(lex, out);
 
 	if (res == BLEXOK) {
 		// skip escaped newline
-		if (out->token == TK_ESCAPE) {
+		if (out->ty == BTK_ESCAPE) {
 			res = simple_next(lex, out);
 
-			if (res == BLEXOK && out->token == TK_NEWLINE)
+			if (res == BLEXOK && out->ty == BTK_NEWLINE)
 				return b_lex_next(lex, out);
 			else
 				return BLEXE_INVALID_ESCAPE_CHAR;
 		}
 
 		// parse 1 inside <> as positive int
-		if (lex->lookahead == TK_L_ANGLE_BRACKET) {
-			if (out->token == TK_TRUE) {
-				out->token = TK_POSITIVE_INT;
+		if (lex->lookahead == BTK_L_ANGLE_BRACKET) {
+			if (out->ty == BTK_TRUE) {
+				out->ty = BTK_POSITIVE_INT;
 				out->info.positive_int = 1;
 			}
 		}
 
 		// checkings for newline skipping
-		if (out->token == TK_L_ANGLE_BRACKET ||
-		    out->token == TK_L_BRACKET ||
-		    out->token == TK_L_PAREN)
+		if (out->ty == BTK_L_ANGLE_BRACKET ||
+		    out->ty == BTK_L_BRACKET ||
+		    out->ty == BTK_L_PAREN)
 			lex->group_depth++;
 
-		if (out->token == TK_R_ANGLE_BRACKET ||
-		    out->token == TK_R_BRACKET ||
-		    out->token == TK_R_PAREN)
+		if (out->ty == BTK_R_ANGLE_BRACKET ||
+		    out->ty == BTK_R_BRACKET ||
+		    out->ty == BTK_R_PAREN)
 			lex->group_depth--;
 
 		// overwrite newline with statement delim token if it is not in
 		// a token
-		if (out->token == TK_NEWLINE) {
+		if (out->ty == BTK_NEWLINE) {
 			if (lex->group_depth)
 				return b_lex_next(lex, out);
 			else
-				out->token = TK_STMT_DELIM;
+				out->ty = BTK_STMT_DELIM;
 		}
 
-		lex->lookahead = out->token;
+		lex->lookahead = out->ty;
 	} else {
-		lex->lookahead = NOTOKEN;
+		lex->lookahead = BTK_NOTOKEN;
 	}
 
 	return res;
