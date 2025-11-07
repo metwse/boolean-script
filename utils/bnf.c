@@ -35,8 +35,8 @@ void print_rule(const struct production rule[MAX_BODY_LENGTH])
 			const char *tk = btokens[rule[i].tk_ty];
 			int tk_len = strlen(tk);
 
-			if (tk_len && tk[0] == '/' && tk[tk_len - 1] == '/') {
-				printf("%s", tk);
+			if (tk_len && tk[0] == '@') {
+				printf("%s", tk + 1);
 			} else {
 				putchar('"');
 				print_tolower(tk);

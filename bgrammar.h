@@ -51,9 +51,10 @@
 	x(TY), \
 	\
 	/* right-recursive expressions */\
+	x(EXPR_OR_LIST_EXPR), \
 	x(EXPR), x(EXPR_REST), \
 	x(TERM), x(TERM_REST), \
-	x(FACTOR), x(OPTINVOLUTION), x(ATOM), \
+	x(FACTOR), x(ATOM), x(OPTINVOLUTION), \
 	/* funciton calls */\
 	x(CALL), x(OPTPARAMS), \
 	\
@@ -67,10 +68,11 @@
 	x(IDENT_LS), x(IDENT_LS_REST), \
 	x(IDENT_OR_MEMBER_LS), x(IDENT_OR_MEMBER_LS_REST), \
 	\
-	x(EXPR_LS), x(EXPR_LS_REST)
+	x(EXPR_LS), x(EXPR_LS_REST), \
+	x(EXPR_OR_LIST_EXPR_LS), x(EXPR_OR_LIST_EXPR_LS_REST)
 
 /** number of nonterminal types */
-#define BNONTERMINAL_COUNT 26
+#define BNONTERMINAL_COUNT 29
 
 
 static const char *const btokens[BTOKEN_COUNT] = {
@@ -85,7 +87,7 @@ static const char *const btokens[BTOKEN_COUNT] = {
 
 	"bool", "vec",
 
-	"/[1-9][0-9]*/", "/[a-zA-Z_][a-zA-Z0-9_]*/",
+	"@[1-9] [0-9]*", "@[a-z] ([a-z] | [A-Z] | [0-9] | \"_\")*",
 };
 
 static const char *const btoken_names[BTOKEN_COUNT] = {

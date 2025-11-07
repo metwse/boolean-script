@@ -14,7 +14,7 @@
 #define EOC { { .end = IEOC } } /* end of construct */
 
 // maximum number of variants constructing the same nonterminal
-#define MAX_VARIANT_COUNT 26
+#define MAX_VARIANT_COUNT 6
 // maximum body length of a rule
 #define MAX_BODY_LENGTH 4
 
@@ -55,6 +55,11 @@ productions[BNONTERMINAL_COUNT][MAX_VARIANT_COUNT][MAX_BODY_LENGTH + 1 /* +1 for
 		EOC
 	},
 
+	/* EXPR_OR_LIST_EXPR */ {
+		{ TK(L_BRACKET), NT(EXPR_LS), TK(R_BRACKET), EOB },
+		{ NT(EXPR), EOB },
+		EOC
+	},
 	/* EXPR */ {
 		{ NT(TERM), NT(EXPR_REST), EOB },
 		EOC
@@ -79,22 +84,21 @@ productions[BNONTERMINAL_COUNT][MAX_VARIANT_COUNT][MAX_BODY_LENGTH + 1 /* +1 for
 		{ NT(ATOM), NT(OPTINVOLUTION), EOB },
 		EOC
 	},
-	/* BNT_OPTINVOLUTION */ {
-		{ TK(INVOLUTION), EOB },
-		{ EOB },
-		EOC
-	},
 	/* ATOM */ {
 		{ TK(L_PAREN), NT(EXPR), TK(R_PAREN), EOB },
-		{ TK(L_BRACKET), NT(EXPR_LS), TK(R_BRACKET), EOB },
 		{ TK(L_PAREN), NT(ASGN), TK(R_PAREN), EOB },
 		{ NT(CALL), EOB },
 		{ NT(IDENT_OR_MEMBER), EOB },
 		{ NT(BIT), EOB },
 		EOC
 	},
+	/* OPTINVOLUTION */ {
+		{ TK(INVOLUTION), EOB },
+		{ EOB },
+		EOC
+	},
 	/* CALL */ {
-		{ NT(IDENT), TK(L_PAREN), NT(OPTPARAMS), TK(L_PAREN), EOB },
+		{ NT(IDENT), TK(L_PAREN), NT(OPTPARAMS), TK(R_PAREN), EOB },
 		EOC
 	},
 	/* OPTPARAMS */ {
@@ -129,7 +133,7 @@ productions[BNONTERMINAL_COUNT][MAX_VARIANT_COUNT][MAX_BODY_LENGTH + 1 /* +1 for
 	},
 
 	/* ASGN */ {
-		{ NT(IDENT_OR_MEMBER_LS), NT(ASGN_REST), TK(ASGN), NT(EXPR_LS), EOB },
+		{ NT(IDENT_OR_MEMBER_LS), NT(ASGN_REST), TK(ASGN), NT(EXPR_OR_LIST_EXPR_LS), EOB },
 		EOC
 	},
 	/* ASGN_REST */ {
@@ -164,6 +168,15 @@ productions[BNONTERMINAL_COUNT][MAX_VARIANT_COUNT][MAX_BODY_LENGTH + 1 /* +1 for
 	},
 	/* EXPR_LS_REST */ {
 		{ TK(DELIM), NT(EXPR), NT(EXPR_LS_REST), EOB },
+		{ EOB },
+		EOC
+	},
+	/* EXPR_OR_LIST_EXPR_LS */ {
+		{ NT(EXPR_OR_LIST_EXPR), NT(EXPR_OR_LIST_EXPR_LS_REST), EOB },
+		EOC
+	},
+	/* EXPR_OR_LIST_EXPR_LS_REST */ {
+		{ TK(DELIM), NT(EXPR_OR_LIST_EXPR), NT(EXPR_OR_LIST_EXPR_LS_REST), EOB },
 		{ EOB },
 		EOC
 	},
