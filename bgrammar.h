@@ -40,9 +40,6 @@
  * A macro named "x" must be defined to process those nonterminals.
  */
 #define BNONTERMINALS \
-	/* for empty leaves */ \
-	x(EPSILON), \
-	\
 	/* primitive types */ \
 	x(BIT), x(POSITIVE_INT), \
 	/* identifiers */ \
@@ -53,16 +50,16 @@
 	/* right-recursive expressions */\
 	x(EXPR), x(EXPR_REST), \
 	x(TERM), x(TERM_REST), \
-	x(FACTOR), x(ATOM), \
+	x(FACTOR), x(OPTINVOLUTION), x(ATOM), \
 	/* funciton calls */\
 	x(CALL), x(OPTPARAMS), \
 	\
 	/* statements */\
 	x(STMT), x(STMTS),\
-	x(DECL), x(DECL_OPTASGNS), \
+	x(DECL), x(DECL_OPTASGN), \
 	\
 	/* right-recursive list types */\
-	x(ASGNS), x(ASGNS_REST), \
+	x(ASGN), x(ASGN_REST), \
 	\
 	x(IDENT_LS), x(IDENT_LS_REST), \
 	x(IDENT_OR_MEMBER_LS), x(IDENT_OR_MEMBER_LS_REST), \

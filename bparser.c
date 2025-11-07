@@ -12,10 +12,8 @@
  * see B_NONTERMINAL
  */
 static const b_umem child_caps[] = {
-	0 /* EPSILON */,
-
 	1 /* BIT */, 1 /* POSITIVE_INT */,
-	1 /* IDEN */, 3 /* IDENT_OR_MEMBER */,
+	1 /* IDENT */, 3 /* IDENT_OR_MEMBER */,
 
 	4 /* TY */,
 
@@ -38,6 +36,7 @@ static const b_umem child_caps[] = {
 
 	2 /* EXPR_REST */, 3 /* EXPR_LS_REST */,
 };
+
 
 void b_parser_init(struct b_parser *p)
 {
