@@ -12,19 +12,19 @@
 #include "bgrammar.h"
 #include "blex.h"
 
-#include <stdbool.h>
-
 
 /** @brief parse tree node */
 struct b_ptree_node {
 	struct b_ptree_node *parent /** parent node */;
 	struct bsymbol symbol /** terminal/nonterminal symbol */;
+	/** nonterminal production variant, body constructed using this */
+	b_byte variant;
 };
 
 /** @brief parse tree plus parser state for incremental parse */
 struct b_ptree {
 	struct b_ptree_node *root /** root of the tree */;
-	bool fulfilled /** a statement has successfully been matched */;
+	struct b_ptree_node *cur /** (current) node that parsing continues on */;
 };
 
 /** @brief parsing status */

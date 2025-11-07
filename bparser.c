@@ -6,36 +6,7 @@
 
 #include <stdlib.h>
 
-
-/*
- * maximum child capacity of nonterminals
- * see B_NONTERMINAL
- */
-static const b_umem child_caps[] = {
-	1 /* BIT */, 1 /* POSITIVE_INT */,
-	1 /* IDENT */, 3 /* IDENT_OR_MEMBER */,
-
-	4 /* TY */,
-
-	/* right-recursive expressions */
-	2 /* EXPR */, 3 /* EXPR_REST */,
-	2 /* TERM */, 3 /* TERM_OR_MEMBER */,
-	2 /* FACTOR */, 3 /* ATOM */,
-	/* function calls */
-	4 /* CALL */, 1 /* OPTPARAMS */,
-
-	/* statements */
-	3 /* STMT */, 2 /* STMTS */,
-	3 /* DECL */, 2 /* DECL_OPTASGNS */,
-
-	/* right-recursive list types */
-	4 /* ASGN */, 3 /* ASGNS_REST */,
-
-	2 /* IDENT_LS */, 3 /* IDENT_LS_REST */,
-	2 /* IDENT_OR_MEMBER */, 3 /* IDENT_OR_MEMBER_LS_REST */,
-
-	2 /* EXPR_REST */, 3 /* EXPR_LS_REST */,
-};
+#include "grammar.c"
 
 
 void b_parser_init(struct b_parser *p)
@@ -71,7 +42,7 @@ struct b_ptree_node *new_construct_node(struct b_ptree_node *parent,
 	n->parent = parent;
 	n->symbol.ty = BSYMBOL_NONTERMINAL;
 
-	b_umem child_cap = child_caps[ty];
+	b_umem child_cap = child_cap_of(ty);
 	n->symbol.nt.ty = ty;
 	n->symbol.nt.child_count = 0;
 	if (child_cap)

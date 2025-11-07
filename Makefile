@@ -11,7 +11,7 @@ BIN_DIR=bin
 TARGET=bs
 
 OBJS=bio.o bmem.o blex.o bparser.o
-TESTS=bmem bio blex
+TESTS=bmem bio blex grammar
 
 # no need to change anything below this line
 TEST:=$(filter tests bin/%.test, $(MAKECMDGOALS))
@@ -45,13 +45,13 @@ docs:
 
 clean:
 	$(RM) $(BIN_DIR) docs \
-		$(wildcard b*.o) $(wildcard tests/b*.o) \
-		$(wildcard b*.gcno) $(wildcard tests/b*.gcno) \
-		$(wildcard b*.gcda) $(wildcard tests/b*.gcda)
+		$(wildcard b*.o) $(wildcard tests/*.o) \
+		$(wildcard b*.gcno) $(wildcard tests/*.gcno) \
+		$(wildcard b*.gcda) $(wildcard tests/*.gcda)
 
 $(foreach target,$(target),$(shell $(CC) -MM b*.c))
 
 .SECONDARY:
-$(foreach test_target,$(test_target),$(shell $(CC) -MM tests/b*.c))
+$(foreach test_target,$(test_target),$(shell $(CC) -MM tests/*.c))
 
 $(BIN_DIR): ; mkdir $@

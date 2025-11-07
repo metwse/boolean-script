@@ -34,6 +34,9 @@
 	/* tokens with auxiliary data */ \
 	x(POSITIVE_INT), x(IDENT)
 
+/** number of token types */
+#define BTOKEN_COUNT 24
+
 /**
  * Macro for defining types related with nonterminals.
  *
@@ -66,8 +69,11 @@
 	\
 	x(EXPR_LS), x(EXPR_LS_REST)
 
+/** number of nonterminal types */
+#define BNONTERMINAL_COUNT 26
 
-static const char *const btokens[] = {
+
+static const char *const btokens[BTOKEN_COUNT] = {
 	"<>",
 
 	"0", "1",
@@ -82,14 +88,14 @@ static const char *const btokens[] = {
 	"<positive-int>", "<ident>",
 };
 
-static const char *const btoken_names[] = {
+static const char *const btoken_names[BTOKEN_COUNT] = {
 	/** @see BTOKENS @internal */
 	#define x(t) # t
 	BTOKENS,
 	#undef x
 };
 
-static const char *const bnonterminals[] = {
+static const char *const bnonterminals[BNONTERMINAL_COUNT] = {
 	/** @see BNONTERMINALS @internal */
 	#define x(t) # t
 	BNONTERMINALS,
@@ -100,21 +106,10 @@ static const char *const bnonterminals[] = {
 struct btoken {
 	/** kind of a token */
 	enum btk_type {
-		BTK_NOTOKEN = 0,
-
-		BTK_FALSE, BTK_TRUE,
-
-		BTK_OR, BTK_AND, BTK_INVOLUTION, BTK_DELIM, BTK_ASGN, BTK_SUBSCRIPT,
-		BTK_L_PAREN, BTK_R_PAREN,
-		BTK_L_ANGLE_BRACKET, BTK_R_ANGLE_BRACKET,
-		BTK_L_BRACKET, BTK_R_BRACKET,
-		BTK_L_CURLY, BTK_R_CURLY,
-
-		BTK_ESCAPE, BTK_NEWLINE, BTK_STMT_DELIM,
-
-		BTK_TY_BOOL, BTK_TY_VEC,
-
-		BTK_POSITIVE_INT, BTK_IDENT
+		/** @see BTOKENS @internal */
+		#define x(t) BTK_ ## t
+		BTOKENS,
+		#undef x
 	} ty /** type of the token (terminal) */;
 
 	union {
