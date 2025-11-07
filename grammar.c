@@ -7,8 +7,11 @@
 #define TK(tk) { .ty = BSYMBOL_TOKEN, .tk_ty = BTK_ ## tk }
 #define NT(nt) { .ty = BSYMBOL_NONTERMINAL, .nt_ty = BNT_ ## nt }
 
-#define EOB (const struct production) { .end = -1 } /* end of body */
-#define EOC { { .end = -2 } } /* end of construct */
+#define IEOB -1 /* integer representing EOB */
+#define IEOC -2 /* integer representing EOC */
+
+#define EOB (const struct production) { .end = IEOB } /* end of body */
+#define EOC { { .end = IEOC } } /* end of construct */
 
 // maximum number of variants constructing the same nonterminal
 #define MAX_VARIANT_COUNT 26
@@ -178,11 +181,11 @@ __attribute__((unused)) static inline b_umem child_cap_of(enum bnt_type nt)
 			child_caps[i] = 0;
 
 			for (b_umem j = 0; j < MAX_VARIANT_COUNT; j++) {
-				if (productions[i][j][0].end == -2)
+				if (productions[i][j][0].end == IEOC)
 					break;
 
 				for (len = 0; len < MAX_BODY_LENGTH; len++)
-					if (productions[i][j][len].end == -1)
+					if (productions[i][j][len].end == IEOB)
 						break;
 
 				if (len > child_caps[i])

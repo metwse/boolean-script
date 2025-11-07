@@ -85,7 +85,7 @@ static const char *const btokens[BTOKEN_COUNT] = {
 
 	"bool", "vec",
 
-	"<positive-int>", "<ident>",
+	"/[1-9][0-9]*/", "/[a-zA-Z_][a-zA-Z0-9_]*/",
 };
 
 static const char *const btoken_names[BTOKEN_COUNT] = {
