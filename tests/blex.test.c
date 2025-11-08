@@ -8,109 +8,35 @@
 
 #include "mock_input_stream.h"
 
-
-const struct btoken tokens[] = {
-	{ .ty = BTK_IDENT, .info.ident = "long_identifier_aaaaaaaaaaaaaaaa", },
-	{ .ty = BTK_ASGN, },
-	{ .ty = BTK_TRUE, },
-	{ .ty = BTK_STMT_DELIM, },
-
-	// { .ty = BTK_NEWLINE, },
+#include "./examples/simple_tokenized.c"
 
 
-	{ .ty = BTK_TY_BOOL, },
-	{ .ty = BTK_IDENT, .info.ident = "b", },
-	{ .ty = BTK_ASGN, },
-	{ .ty = BTK_IDENT, .info.ident = "a", },
-	{ .ty = BTK_INVOLUTION, },
-	{ .ty = BTK_STMT_DELIM, },
-
-	{ .ty = BTK_IDENT, .info.ident = "c", },
-	{ .ty = BTK_ASGN, },
-	{ .ty = BTK_IDENT, .info.ident = "a", },
-	{ .ty = BTK_AND, },
-	{ .ty = BTK_IDENT, .info.ident = "b", },
-	{ .ty = BTK_STMT_DELIM, },
-
-	// { .ty = BTK_NEWLINE, },
-
-
-	{ .ty = BTK_TY_VEC, },
-	{ .ty = BTK_L_ANGLE_BRACKET, },
-		{ .ty = BTK_POSITIVE_INT, .info.positive_int = 3, },
-	{ .ty = BTK_R_ANGLE_BRACKET, },
-	{ .ty = BTK_IDENT, .info.ident = "d", },
-	{ .ty = BTK_ASGN, },
-	{ .ty = BTK_L_BRACKET },
-		{ .ty = BTK_L_PAREN },
-			{ .ty = BTK_IDENT, .info.ident = "b", },
-			{ .ty = BTK_AND, },
-			{ .ty = BTK_FALSE, },
-		{ .ty = BTK_R_PAREN },
-		{ .ty = BTK_INVOLUTION },
-	{ .ty = BTK_DELIM },
-		{ .ty = BTK_TRUE },
-		{ .ty = BTK_AND },
-		{ .ty = BTK_L_PAREN },
-			{ .ty = BTK_FALSE },
-			{ .ty = BTK_OR },
-			{ .ty = BTK_TRUE },
-		{ .ty = BTK_R_PAREN },
-	{ .ty = BTK_DELIM },
-		{ .ty = BTK_L_PAREN },
-			{ .ty = BTK_TRUE },
-			{ .ty = BTK_OR },
-			{ .ty = BTK_FALSE },
-		{ .ty = BTK_R_PAREN },
-		{ .ty = BTK_AND },
-		{ .ty = BTK_TRUE },
-	{ .ty = BTK_R_BRACKET },
-	{ .ty = BTK_STMT_DELIM },
-
-	// { .ty = BTK_NEWLINE, },
-
-
-	{ .ty = BTK_TY_VEC, },
-	{ .ty = BTK_L_ANGLE_BRACKET, },
-		{ .ty = BTK_POSITIVE_INT, .info.positive_int = 1234567890, },
-	{ .ty = BTK_R_ANGLE_BRACKET, },
-	{ .ty = BTK_IDENT, .info.ident = "e", },
-	{ .ty = BTK_STMT_DELIM },
-
-	{ .ty = BTK_TY_VEC, },
-	{ .ty = BTK_L_ANGLE_BRACKET, },
-		{ .ty = BTK_POSITIVE_INT, .info.positive_int = 1, },
-	{ .ty = BTK_R_ANGLE_BRACKET, },
-	{ .ty = BTK_IDENT, .info.ident = "f", },
-	{ .ty = BTK_STMT_DELIM },
-
-	{ .ty = BTK_NOTOKEN },
-};
-
-void consume_tokenstream(struct b_lex *lex, const char *tokenstream)
+void test_valid(struct b_lex *lex, struct test_case tc)
 {
 	struct bio bio;
 
 	bio_init(&bio, mock_input_stream,
-		 new_mock_input_stream_state(tokenstream,
-					     strlen(tokenstream)));
+		 new_mock_input_stream_state(tc.str, strlen(tc.str)));
 
 	b_lex_setinput(lex, &bio);
 
-	for (b_umem i = 0; i < sizeof(tokens) / sizeof(struct btoken); i++) {
+	for (b_umem i = 0; i < sizeof(tc.tk) / sizeof(struct btoken); i++) {
 		struct btoken lexeme;
 		b_lex_next(lex, &lexeme);
 
-		b_assert_expr(lexeme.ty == tokens[i].ty, "lexeme error");
+		if (lexeme.ty == BTK_NOTOKEN)
+			break;
+
+		b_assert_expr(lexeme.ty == tc.tk[i].ty, "lexeme error");
 
 		if (lexeme.ty == BTK_POSITIVE_INT) {
 			b_assert_expr(
-				lexeme.info.positive_int == tokens[i].info.positive_int,
+				lexeme.info.positive_int == tc.tk[i].info.positive_int,
 				"int error"
 			);
 		} else if (lexeme.ty == BTK_IDENT) {
 			b_assert_expr(
-				strcmp(lexeme.info.ident, tokens[i].info.ident) == 0,
+				strcmp(lexeme.info.ident, tc.tk[i].info.ident) == 0,
 				"ident error"
 			);
 
@@ -147,12 +73,6 @@ int main()
 
 	b_lex_init(&lex);
 
-	const char *tokenstream =
-		"long_identifier_aaaaaaaaaaaaaaaa \\\n= 1;"
-		"bool b = a'\n c = a * \\\nb;"
-		"vec<3> d = [(b * 0\n)', 1 * (0 + 1), (1 + 0) * 1];"
-		"vec<1234567890> e\n vec<1\n> f;";
-
 	const char *invalid_tokenstreams[] = {
 		"long_identifier_aaaaaaaaaaaaaaaaa also this tests memory leak in terminated streams",
 		"12345678901",
@@ -160,9 +80,8 @@ int main()
 		"\\not newline",
 	};
 
-
-	for (int _fuzz = 0; _fuzz < 4; _fuzz++)
-		consume_tokenstream(&lex, tokenstream);
+	for (b_umem i = 0; i < sizeof(test_cases) / sizeof(struct test_case); i++)
+		test_valid(&lex, test_cases[i]);
 
 
 	test_invalid(&lex, invalid_tokenstreams[0], BLEXE_IDENT_TOO_LONG);

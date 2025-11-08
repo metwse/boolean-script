@@ -16,7 +16,7 @@
 // maximum number of variants constructing the same nonterminal
 #define MAX_VARIANT_COUNT 7
 // maximum body length of a rule
-#define MAX_BODY_LENGTH 4
+#define MAX_BODY_LENGTH 10
 
 /** nonterminal rules */
 struct production {
@@ -28,150 +28,136 @@ struct production {
 	};
 };
 
+/** rule */
+#define r(...) { { __VA_ARGS__ EOB }, EOC }
+
 /** right-recursive list rules */
-#define RR(head, listelem, delim) \
+#define rrr(head, listelem, delim) \
 	{ { NT(listelem), NT(head ## _REST), EOB }, EOC }, \
 	{ { TK(delim), NT(head), NT(head ## _REST), EOB }, { EOB }, EOC }
 
+/** optional rules */
+#define ropt(...) { { __VA_ARGS__, EOB }, { EOB }, EOC }
 
+/** array delimiter for the sake of clarity */
+#define or EOB, }, {
 
 static const struct production
 productions[BNONTERMINAL_COUNT][MAX_VARIANT_COUNT][MAX_BODY_LENGTH + 1 /* +1 for EOB */] = {
-	/* BIT */ { { TK(TRUE), EOB }, { TK(FALSE), EOB }, EOC },
-	/* POSITIVE_INT */ { { TK(POSITIVE_INT), EOB }, EOC },
+// ===== primitive types ======================================================
+	/* <bit> ::= */ r(
+		TK(TRUE),
+	or	TK(FALSE),
+	),
+	/* <positive_int> ::= */ r(
+		TK(POSITIVE_INT),
+	),
 
-	/* IDENT */ {
-		{ TK(IDENT), EOB },
-		EOC
-	},
-	/* IDENT_OR_MEMBER */ {
-		{ NT(IDENT), EOB },
-		{ NT(IDENT), TK(SUBSCRIPT), NT(POSITIVE_INT), EOB },
-		EOC
-	},
+// ===== identifiers ==========================================================
+	/* <ident> ::= */ r(
+		TK(IDENT),
+	),
+	/* <ident_or_member> ::= */ r(
+		NT(IDENT),
+	or	NT(IDENT), TK(DOT), NT(POSITIVE_INT),
+	),
 
-	/* TY */ { { NT(TY_BOOL), EOB }, { NT(TY_VEC), EOB }, EOC },
-	/* TY_BOOL */ {
-		{ TK(TY_BOOL), EOB },
-		{ EOB },
-		EOC
-	},
-	/* TY_VEC */ {
-		{ TK(TY_VEC), TK(L_ANGLE_BRACKET), NT(POSITIVE_INT), TK(R_ANGLE_BRACKET), EOB },
-		EOC
-	},
+// ===== types ================================================================
+	/* <ty> ::= */ r(
+		NT(TY_BOOL),
+	or	NT(TY_VEC),
+	),
+	/* <ty_bool> ::= */ r(
+		TK(TY_BOOL),
+	or	/* empty */
+	),
+	/* <ty_vec> ::= */ r(
+		TK(TY_VEC), TK(L_ANGLE_BRACKET), NT(POSITIVE_INT), TK(R_ANGLE_BRACKET),
+	),
 
-	/* EXPR_OR_INITLIST */ {
-		{ NT(INITLIST), EOB },
-		{ NT(EXPR), EOB },
-		EOC
-	},
-	/* EXPR */ RR(EXPR, TERM, OR),
-	/* INITLIST */ {
-		{ TK(L_BRACKET), NT(EXPR_LS), TK(R_BRACKET), EOB },
-		EOC
-	},
+	/* <expr_or_initlist> ::= */ r(
+		NT(INITLIST),
+	or	NT(EXPR),
+	),
+	/* <initlist> ::= */ r(
+		TK(L_BRACKET), NT(EXPR_LS), TK(R_BRACKET),
+	),
 
-	/* TERM */ RR(TERM, FACTOR, AND),
-	/* FACTOR */ {
-		{ NT(ATOM), NT(OPTINVOLUTION), EOB },
-		EOC
-	},
-	/* ATOM */ {
-		{ TK(L_PAREN), NT(EXPR), TK(R_PAREN), EOB },
-		{ TK(L_PAREN), NT(ASGN_BOOL), TK(R_PAREN), EOB },
-		{ NT(CALL), EOB },
-		{ NT(IDENT_OR_MEMBER), EOB },
-		{ NT(BIT), EOB },
-		EOC
-	},
-	/* OPTINVOLUTION */ {
-		{ TK(INVOLUTION), EOB },
-		{ EOB },
-		EOC
-	},
-	/* CALL */ {
-		{ NT(IDENT), TK(L_PAREN), NT(OPTPARAMS), TK(R_PAREN), EOB },
-		EOC
-	},
-	/* PARAMS */ RR(PARAMS, EXPR_OR_INITLIST, DELIM),
-	/* OPTPARAMS */ {
-		{ NT(PARAMS), EOB },
-		{ EOB },
-		EOC
-	},
+// ===== expressions ==========================================================
+	/* <expr> ::= */
+		rrr(EXPR, TERM, OR),
+	/* <term> ::= */
+		rrr(TERM, FACTOR, AND),
+	/* <factor> ::= */ r(
+		NT(ATOM), NT(OPTINVOLUTION),
+	),
+	/* <atom> ::= */ r(
+		TK(L_PAREN), NT(EXPR), TK(R_PAREN),
+	or	TK(L_PAREN), NT(ASGN), TK(R_PAREN),
+	or	NT(CALL),
+	or	NT(IDENT_OR_MEMBER),
+	or	NT(BIT),
+	),
+	/* <optinvolution> ::= */ ropt(TK(INVOLUTION)),
+	/* <call> ::= */ r(
+		NT(IDENT), TK(L_PAREN), NT(CALL_OPTPARAMS), TK(R_PAREN),
+	),
+	/* <call_params> ::= */
+		rrr(CALL_PARAMS, EXPR_OR_INITLIST, COMMA),
+	/* <call_optparams> ::= */
+		ropt(NT(CALL_PARAMS)),
 
-	/* STMT */ {
-		{ NT(DECL_BOOL), TK(STMT_DELIM), EOB },
-		{ NT(DECL_VEC), TK(STMT_DELIM), EOB },
-		{ NT(ASGN_BOOL), TK(STMT_DELIM), EOB },
-		{ NT(ASGN_VEC), TK(STMT_DELIM), EOB },
-		{ NT(CALL), TK(STMT_DELIM), EOB },
-		{ TK(L_CURLY), NT(STMTS), TK(R_CURLY), EOB },
-		EOC
-	},
-	/* STMTS */ {
-		{ NT(STMT), NT(STMTS), EOB },
-		{ EOB },
-		EOC
-	},
+// ===== statements ===========================================================
+	/* <stmt> ::= */ r(
+		NT(VAR_DECL), TK(SEMI),
+	or	NT(EXPR_DECL), TK(SEMI),
+	or	NT(ASGN), TK(SEMI),
+	or	NT(CALL), TK(SEMI),
+	or	TK(L_CURLY), NT(STMTS), TK(R_CURLY),
+	or	TK(SEMI),
+	),
+	/* <stmts> ::= */ ropt(NT(STMT), NT(STMTS)),
 
-	/* DECL_BOOL */ {
-		{ NT(TY_BOOL), NT(IDENT_LS), NT(DECL_BOOL_OPTASGN), EOB },
-		EOC
-	},
-	/* DECL_BOOL_OPTASGN */ {
-		{ TK(ASGN), NT(ASGN_BOOL), EOB },
-		{ TK(ASGN), NT(EXPR), EOB },
-		{ EOB },
-		EOC
-	},
-	/* DECL_VEC */ {
-		{ NT(TY_VEC), NT(IDENT_LS), NT(DECL_VEC_OPTASGN), EOB },
-		EOC
-	},
-	/* DECL_VEC_OPTASGN */ {
-		{ TK(ASGN), NT(ASGN_VEC), EOB },
-		{ TK(ASGN), NT(INITLIST), EOB },
-		{ EOB },
-		EOC
-	},
+// ===== variable or expression declarations ==================================
+	/* <var_decl> ::= */ r(
+		NT(TY), NT(IDENT_LS), NT(VAR_DECL_OPTASGN),
+	),
+	/* <var_decl_optasgn> ::= */ r(
+		TK(EQ), NT(ASGN),
+	or	TK(EQ), NT(EXPR_OR_INITLIST_LS),
+	or	/* empty */
+	),
+	/* <expr_decl> ::= */ r(
+		// "expr" <ident> "(" <expr_decl_optparams> ")"
+		TK(EXPR), NT(IDENT), TK(L_PAREN), NT(EXPR_DECL_OPTPARAMS), TK(R_PAREN),
+			// "->" "(" <expr_decl_optparams> ")"
+			TK(RARROW), TK(L_PAREN), NT(EXPR_DECL_OPTPARAMS), TK(R_PAREN),
+			NT(STMTS),
+	),
+	/* <expr_decl_param> ::= */ r(
+		NT(TY), NT(IDENT),
+	),
+	/* <expr_decl_params> ::= */
+		rrr(EXPR_DECL_PARAMS, EXPR_DECL_PARAM, COMMA),
+	/* <expr_decl_optparams> ::= */
+		ropt(NT(EXPR_DECL_PARAMS)),
 
-	// TODO: deduplicate asgn rule definitions
-	/* ASGN */ {
-		{ NT(IDENT_OR_MEMBER_LS), NT(ASGN_BOOL_REST), TK(ASGN), NT(EXPR_OR_INITLIST), EOB },
-		EOC
-	},
-	/* ASGN_REST */ {
-		{ TK(ASGN), NT(IDENT_OR_MEMBER_LS), NT(ASGN_REST), EOB },
-		{ EOB },
-		EOC
-	},
-	/* ASGN_BOOL */ {
-		{ NT(IDENT_OR_MEMBER_LS), NT(ASGN_BOOL_REST), TK(ASGN), NT(EXPR), EOB },
-		EOC
-	},
-	/* ASGN_BOOL_REST */ {
-		{ TK(ASGN), NT(IDENT_OR_MEMBER_LS), NT(ASGN_BOOL_REST), EOB },
-		{ EOB },
-		EOC
-	},
-	/* ASGN_VEC */ {
-		{ NT(IDENT_OR_MEMBER_LS), NT(ASGN_VEC_REST), TK(ASGN), NT(INITLIST_LS), EOB },
-		EOC
-	},
-	/* ASGN_VEC_REST */ {
-		{ TK(ASGN), NT(IDENT_OR_MEMBER_LS), NT(ASGN_VEC_REST), EOB },
-		{ EOB },
-		EOC
-	},
-
-	/* IDENT_LS */ RR(IDENT_LS, IDENT, DELIM),
-	/* IDENT_OR_MEMBER_LS_LS */ RR(IDENT_OR_MEMBER_LS, IDENT, DELIM),
-
-	/* EXPR_LS */ RR(EXPR_LS, EXPR, DELIM),
-	/* INITLIST_LS */ RR(INITLIST_LS, INITLIST, DELIM),
+// ===== right-recursive list types ===========================================
+	/* <asgn> ::= */ r(
+		NT(IDENT_OR_MEMBER_LS), NT(ASGN_REST), TK(EQ), NT(EXPR_OR_INITLIST_LS),
+	),
+	/* <asgn_rest> ::= */
+		ropt(TK(EQ), NT(IDENT_OR_MEMBER_LS), NT(ASGN_REST)),
+	/* <ident_ls> ::= */
+		rrr(IDENT_LS, IDENT, COMMA),
+	/* <ident_or_member_ls> ::= */
+		rrr(IDENT_OR_MEMBER_LS, IDENT, COMMA),
+	/* <expr_ls> ::= */
+		rrr(EXPR_LS, EXPR, COMMA),
+	/* <initlist_ls> ::= */
+		rrr(EXPR_OR_INITLIST_LS, INITLIST, COMMA),
 };
+
 
 /* no lock/once used lazy initialization for widest compability */
 __attribute__((unused)) static inline b_umem child_cap_of(enum bnt_type nt)

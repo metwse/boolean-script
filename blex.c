@@ -82,7 +82,7 @@ enum b_lex_result simple_next(struct b_lex *lex, struct btoken *out)
 			}
 		}
 
-		for (int i = BTK_OR; i <= BTK_STMT_DELIM; i++)
+		for (int i = BTK_OR; i <= BTK_SEMI; i++)
 			if (input == btokens[i][0]) {
 				if (token_len == 0) {
 					out->ty = i;
@@ -101,16 +101,6 @@ enum b_lex_result simple_next(struct b_lex *lex, struct btoken *out)
 		// outer for loop.
 		if (lex->peek)
 			break;
-
-		token_string[token_len] = input;
-		token_string[token_len + 1] = '\0';
-
-		for (int i = BTK_TY_BOOL; i <= BTK_TY_VEC; i++) {
-			if (strcmp(btokens[i], token_string) == 0) {
-				out->ty = i;
-				return BLEXOK;
-			}
-		}
 
 		if (token_len == 0 && input == '0') {
 			valid_ident = valid_positive_int = false;
@@ -131,6 +121,9 @@ enum b_lex_result simple_next(struct b_lex *lex, struct btoken *out)
 				break;
 			}
 		}
+
+		token_string[token_len] = input;
+		token_string[token_len + 1] = '\0';
 	}
 
 	if (token_len == 1 && token_string[0] == btokens[BTK_FALSE][0]) {
@@ -157,6 +150,13 @@ enum b_lex_result simple_next(struct b_lex *lex, struct btoken *out)
 			return BLEXE_INTEGER_TOO_LARGE;
 		}
 	} else if (token_len && valid_ident) {
+		for (int i = BTK_RARROW; i <= BTK_RETURN; i++) {
+			if (strcmp(btokens[i], token_string) == 0) {
+				out->ty = i;
+				return BLEXOK;
+			}
+		}
+
 		if (token_len <= BLEX_MAX_IDENT_LEN) {
 			char *ident = malloc(sizeof(char) * (token_len + 1));
 			memcpy(ident, token_string, token_len + 1 /* +1 for \0 */);
@@ -211,7 +211,7 @@ enum b_lex_result b_lex_next(struct b_lex *lex, struct btoken *out) {
 			if (lex->group_depth)
 				return b_lex_next(lex, out);
 			else
-				out->ty = BTK_STMT_DELIM;
+				out->ty = BTK_SEMI;
 		}
 
 		lex->lookahead = out->ty;

@@ -20,22 +20,25 @@
 	x(FALSE), x(TRUE), \
 	\
 	/* 1-character tokens */ \
-	x(OR), x(AND), x(INVOLUTION), x(DELIM), x(ASGN), x(SUBSCRIPT), \
+	x(OR), x(AND), x(INVOLUTION), x(COMMA), x(EQ), x(DOT), \
 	x(L_PAREN), x(R_PAREN), \
 	x(L_ANGLE_BRACKET), x(R_ANGLE_BRACKET), \
 	x(L_BRACKET), x(R_BRACKET), \
 	x(L_CURLY), x(R_CURLY), \
 	\
-	x(ESCAPE), x(NEWLINE), x(STMT_DELIM), \
+	x(ESCAPE), x(NEWLINE), x(SEMI), \
+	\
+	/* multi-character punctuation */ \
+	x(RARROW), \
 	\
 	/* keywords and reserved words */ \
-	x(TY_BOOL), x(TY_VEC), \
+	x(TY_BOOL), x(TY_VEC), x(EXPR), x(RETURN), \
 	\
 	/* tokens with auxiliary data */ \
 	x(POSITIVE_INT), x(IDENT)
 
 /** number of token types */
-#define BTOKEN_COUNT 24
+#define BTOKEN_COUNT 27
 
 /**
  * Macro for defining types related with nonterminals.
@@ -52,30 +55,31 @@
 	\
 	/* right-recursive expressions */\
 	x(EXPR_OR_INITLIST), \
-	BNT_RR(EXPR), x(INITLIST), \
+	x(INITLIST), \
+	BNT_RR(EXPR), \
 	BNT_RR(TERM), \
 	x(FACTOR), x(ATOM), x(OPTINVOLUTION), \
 	/* funciton calls */ \
-	x(CALL), BNT_RR(PARAMS), x(OPTPARAMS), \
+	x(CALL), BNT_RR(CALL_PARAMS), x(CALL_OPTPARAMS), \
 	\
 	/* statements */ \
 	x(STMT), x(STMTS), \
-	x(DECL_BOOL), x(DECL_BOOL_OPTASGN), \
-	x(DECL_VEC), x(DECL_VEC_OPTASGN), \
+	x(VAR_DECL), x(VAR_DECL_OPTASGN), \
+	/* function declarations */ \
+	x(EXPR_DECL), \
+	x(EXPR_DECL_PARAM), BNT_RR(EXPR_DECL_PARAMS), x(EXPR_DECL_OPTPARAMS), \
 	\
 	/* right-recursive list types */\
 	BNT_RR(ASGN), \
-	BNT_RR(ASGN_BOOL), \
-	BNT_RR(ASGN_VEC), \
 	\
 	BNT_RR(IDENT_LS), \
 	BNT_RR(IDENT_OR_MEMBER_LS), \
 	\
 	BNT_RR(EXPR_LS), \
-	BNT_RR(INITLIST_LS)
+	BNT_RR(EXPR_OR_INITLIST_LS)
 
 /** number of nonterminal types */
-#define BNONTERMINAL_COUNT 40
+#define BNONTERMINAL_COUNT 39
 
 /** right-recursive nonterminal definition */
 #define BNT_RR(nt) x(nt), x(nt ## _REST)
@@ -91,7 +95,9 @@ static const char *const btokens[BTOKEN_COUNT] = {
 
 	"\\", "\n", ";",
 
-	"bool", "vec",
+	"->",
+
+	"bool", "vec", "expr", "return",
 
 	"@[1-9] [0-9]*", "@[a-z] ([a-z] | [A-Z] | [0-9] | \"_\")*",
 };
