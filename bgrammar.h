@@ -21,10 +21,10 @@
 	\
 	/* 1-character tokens */ \
 	x(OR), x(AND), x(INVOLUTION), x(COMMA), x(EQ), x(DOT), \
-	x(L_PAREN), x(R_PAREN), \
-	x(L_ANGLE_BRACKET), x(R_ANGLE_BRACKET), \
-	x(L_BRACKET), x(R_BRACKET), \
-	x(L_CURLY), x(R_CURLY), \
+	x(LPAREN), x(RPAREN), \
+	x(LANGLE_BRACKET), x(RANGLE_BRACKET), \
+	x(LBRACKET), x(RBRACKET), \
+	x(LCURLY), x(RCURLY), \
 	\
 	x(ESCAPE), x(NEWLINE), x(SEMI), \
 	\
@@ -144,8 +144,11 @@ struct bnonterminal {
 		#undef x
 	} ty /** type of the nonterminal */;
 
-	struct bsymbol *children /** child nodes */;
+	struct bsymbol **children /** child nodes */;
 	b_umem child_count /** child node count */;
+
+	/** nonterminal production variant */
+	b_byte variant;
 };
 
 /** @brief terminal or nonterminal token */
@@ -156,11 +159,14 @@ struct bsymbol {
 		/** terminal (token) type of symbol */
 		struct btoken tk;
 	};
+
 	/** @brief symbol type */
 	enum bsymbol_type {
 		BSYMBOL_NONTERMINAL,
 		BSYMBOL_TOKEN,
 	} ty /** type of the symbol */;
+
+	struct bsymbol *parent /** parent nonterminal */;
 };
 
 

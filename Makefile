@@ -11,7 +11,7 @@ BIN_DIR=bin
 TARGET=bs
 
 OBJS=bio.o bmem.o blex.o bparser.o
-TESTS=bmem bio blex grammar
+TESTS=bmem bio blex grammar bparser_internal
 UTILS=bnf
 
 # no need to change anything below this line

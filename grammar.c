@@ -4,19 +4,14 @@
 #include <stdbool.h>
 
 
-#define TK(tk) { .ty = BSYMBOL_TOKEN, .tk_ty = BTK_ ## tk }
-#define NT(nt) { .ty = BSYMBOL_NONTERMINAL, .nt_ty = BNT_ ## nt }
-
-#define IEOB -1 /* integer representing EOB */
-#define IEOC -2 /* integer representing EOC */
-
-#define EOB (const struct production) { .end = IEOB } /* end of body */
-#define EOC { { .end = IEOC } } /* end of construct */
+#define EOB -1 /* integer representing EOB */
+#define EOC -2 /* integer representing EOC */
 
 // maximum number of variants constructing the same nonterminal
 #define MAX_VARIANT_COUNT 7
 // maximum body length of a rule
 #define MAX_BODY_LENGTH 10
+
 
 /** nonterminal rules */
 struct production {
@@ -28,19 +23,28 @@ struct production {
 	};
 };
 
+
+#define SEOB (const struct production) { .end = EOB } /* end of body */
+#define SEOC { { .end = EOC } } /* end of construct */
+
+#define TK(tk) { .ty = BSYMBOL_TOKEN, .tk_ty = BTK_ ## tk }
+#define NT(nt) { .ty = BSYMBOL_NONTERMINAL, .nt_ty = BNT_ ## nt }
+
+
 /** rule */
-#define r(...) { { __VA_ARGS__ EOB }, EOC }
+#define r(...) { { __VA_ARGS__ SEOB }, SEOC }
 
 /** right-recursive list rules */
 #define rrr(head, listelem, delim) \
-	{ { NT(listelem), NT(head ## _REST), EOB }, EOC }, \
-	{ { TK(delim), NT(head), NT(head ## _REST), EOB }, { EOB }, EOC }
+	{ { NT(listelem), NT(head ## _REST), SEOB }, SEOC }, \
+	{ { TK(delim), NT(head), NT(head ## _REST), SEOB }, { SEOB }, SEOC }
 
 /** optional rules */
-#define ropt(...) { { __VA_ARGS__, EOB }, { EOB }, EOC }
+#define ropt(...) { { __VA_ARGS__, SEOB }, { SEOB }, SEOC }
 
 /** array delimiter for the sake of clarity */
-#define or EOB, }, {
+#define or SEOB, }, {
+
 
 static const struct production
 productions[BNONTERMINAL_COUNT][MAX_VARIANT_COUNT][MAX_BODY_LENGTH + 1 /* +1 for EOB */] = {
@@ -72,7 +76,7 @@ productions[BNONTERMINAL_COUNT][MAX_VARIANT_COUNT][MAX_BODY_LENGTH + 1 /* +1 for
 	or	/* empty */
 	),
 	/* <ty_vec> ::= */ r(
-		TK(TY_VEC), TK(L_ANGLE_BRACKET), NT(POSITIVE_INT), TK(R_ANGLE_BRACKET),
+		TK(TY_VEC), TK(LANGLE_BRACKET), NT(POSITIVE_INT), TK(RANGLE_BRACKET),
 	),
 
 	/* <expr_or_initlist> ::= */ r(
@@ -80,7 +84,7 @@ productions[BNONTERMINAL_COUNT][MAX_VARIANT_COUNT][MAX_BODY_LENGTH + 1 /* +1 for
 	or	NT(EXPR),
 	),
 	/* <initlist> ::= */ r(
-		TK(L_BRACKET), NT(EXPR_LS), TK(R_BRACKET),
+		TK(LBRACKET), NT(EXPR_LS), TK(RBRACKET),
 	),
 
 // ===== expressions ==========================================================
@@ -92,15 +96,15 @@ productions[BNONTERMINAL_COUNT][MAX_VARIANT_COUNT][MAX_BODY_LENGTH + 1 /* +1 for
 		NT(ATOM), NT(OPTINVOLUTION),
 	),
 	/* <atom> ::= */ r(
-		TK(L_PAREN), NT(EXPR), TK(R_PAREN),
-	or	TK(L_PAREN), NT(ASGN), TK(R_PAREN),
+		TK(LPAREN), NT(EXPR), TK(RPAREN),
+	or	TK(LPAREN), NT(ASGN), TK(RPAREN),
 	or	NT(CALL),
 	or	NT(IDENT_OR_MEMBER),
 	or	NT(BIT),
 	),
 	/* <optinvolution> ::= */ ropt(TK(INVOLUTION)),
 	/* <call> ::= */ r(
-		NT(IDENT), TK(L_PAREN), NT(CALL_OPTPARAMS), TK(R_PAREN),
+		NT(IDENT), TK(LPAREN), NT(CALL_OPTPARAMS), TK(RPAREN),
 	),
 	/* <call_params> ::= */
 		rrr(CALL_PARAMS, EXPR_OR_INITLIST, COMMA),
@@ -113,7 +117,7 @@ productions[BNONTERMINAL_COUNT][MAX_VARIANT_COUNT][MAX_BODY_LENGTH + 1 /* +1 for
 	or	NT(EXPR_DECL), TK(SEMI),
 	or	NT(ASGN), TK(SEMI),
 	or	NT(CALL), TK(SEMI),
-	or	TK(L_CURLY), NT(STMTS), TK(R_CURLY),
+	or	TK(LCURLY), NT(STMTS), TK(RCURLY),
 	or	TK(SEMI),
 	),
 	/* <stmts> ::= */ ropt(NT(STMT), NT(STMTS)),
@@ -129,9 +133,9 @@ productions[BNONTERMINAL_COUNT][MAX_VARIANT_COUNT][MAX_BODY_LENGTH + 1 /* +1 for
 	),
 	/* <expr_decl> ::= */ r(
 		// "expr" <ident> "(" <expr_decl_optparams> ")"
-		TK(EXPR), NT(IDENT), TK(L_PAREN), NT(EXPR_DECL_OPTPARAMS), TK(R_PAREN),
+		TK(EXPR), NT(IDENT), TK(LPAREN), NT(EXPR_DECL_OPTPARAMS), TK(RPAREN),
 			// "->" "(" <expr_decl_optparams> ")"
-			TK(RARROW), TK(L_PAREN), NT(EXPR_DECL_OPTPARAMS), TK(R_PAREN),
+			TK(RARROW), TK(LPAREN), NT(EXPR_DECL_OPTPARAMS), TK(RPAREN),
 			NT(STMTS),
 	),
 	/* <expr_decl_param> ::= */ r(
@@ -154,13 +158,13 @@ productions[BNONTERMINAL_COUNT][MAX_VARIANT_COUNT][MAX_BODY_LENGTH + 1 /* +1 for
 		rrr(IDENT_OR_MEMBER_LS, IDENT, COMMA),
 	/* <expr_ls> ::= */
 		rrr(EXPR_LS, EXPR, COMMA),
-	/* <initlist_ls> ::= */
-		rrr(EXPR_OR_INITLIST_LS, INITLIST, COMMA),
+	/* <expr_or_initlist_ls> ::= */
+		rrr(EXPR_OR_INITLIST_LS, EXPR_OR_INITLIST, COMMA),
 };
 
 
 /* no lock/once used lazy initialization for widest compability */
-__attribute__((unused)) static inline b_umem child_cap_of(enum bnt_type nt)
+static inline b_umem b_unused_fn(child_cap_of)(enum bnt_type nt)
 {
 	static b_umem child_caps[BNONTERMINAL_COUNT];
 	bool initialized = false;
@@ -171,11 +175,11 @@ __attribute__((unused)) static inline b_umem child_cap_of(enum bnt_type nt)
 			child_caps[i] = 0;
 
 			for (b_umem j = 0; j < MAX_VARIANT_COUNT; j++) {
-				if (productions[i][j][0].end == IEOC)
+				if (productions[i][j][0].end == EOC)
 					break;
 
 				for (len = 0; len < MAX_BODY_LENGTH; len++)
-					if (productions[i][j][len].end == IEOB)
+					if (productions[i][j][len].end == EOB)
 						break;
 
 				if (len > child_caps[i])
@@ -188,3 +192,39 @@ __attribute__((unused)) static inline b_umem child_cap_of(enum bnt_type nt)
 
 	return child_caps[nt];
 }
+
+/* no lock/once used lazy initialization for widest compability */
+static inline b_umem b_unused_fn(variant_count_of)(enum bnt_type nt)
+{
+	static b_umem variant_counts[BNONTERMINAL_COUNT];
+	bool initialized = false;
+
+	if (!initialized) {
+		for (b_umem i = 0; i < BNONTERMINAL_COUNT; i++) {
+			b_umem count = 0;
+
+			for (b_umem j = 0;
+			     productions[i][j][0].end != EOC && j < MAX_VARIANT_COUNT;
+			     j++)
+				count++;
+
+			variant_counts[i] = count;
+		}
+
+		initialized = true;
+	}
+
+	return variant_counts[nt];
+}
+
+#undef SEOB
+#undef SEOC
+
+#undef TK
+#undef NT
+
+#undef r
+#undef rrr
+#undef ropt
+
+#undef or

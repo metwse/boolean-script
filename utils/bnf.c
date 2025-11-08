@@ -22,7 +22,7 @@ void print_tolower(const char *str)
 void print_rule(const struct production rule[MAX_BODY_LENGTH])
 {
 	for (int i = 0; i < MAX_BODY_LENGTH; i++) {
-		if (rule[i].end == IEOB) {
+		if (rule[i].end == EOB) {
 			if (i == 0)
 				putchar('E');
 
@@ -61,7 +61,7 @@ int main()
 		print_tolower(bnonterminals[head]);
 		printf("> ::= ");
 
-		for (int rule = 0; productions[head][rule][0].end != IEOC; rule++) {
+		for (int rule = 0; productions[head][rule][0].end != EOC; rule++) {
 			if (rule != 0) {
 				putchar('\n');
 				for (int i = 0; i < padding; i++)

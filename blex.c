@@ -187,7 +187,7 @@ enum b_lex_result b_lex_next(struct b_lex *lex, struct btoken *out) {
 		}
 
 		// parse 1 inside <> as positive int
-		if (lex->lookahead == BTK_L_ANGLE_BRACKET) {
+		if (lex->lookahead == BTK_LANGLE_BRACKET) {
 			if (out->ty == BTK_TRUE) {
 				out->ty = BTK_POSITIVE_INT;
 				out->info.positive_int = 1;
@@ -195,14 +195,14 @@ enum b_lex_result b_lex_next(struct b_lex *lex, struct btoken *out) {
 		}
 
 		// checkings for newline skipping
-		if (out->ty == BTK_L_ANGLE_BRACKET ||
-		    out->ty == BTK_L_BRACKET ||
-		    out->ty == BTK_L_PAREN)
+		if (out->ty == BTK_LANGLE_BRACKET ||
+		    out->ty == BTK_LBRACKET ||
+		    out->ty == BTK_LPAREN)
 			lex->group_depth++;
 
-		if (out->ty == BTK_R_ANGLE_BRACKET ||
-		    out->ty == BTK_R_BRACKET ||
-		    out->ty == BTK_R_PAREN)
+		if (out->ty == BTK_RANGLE_BRACKET ||
+		    out->ty == BTK_RBRACKET ||
+		    out->ty == BTK_RPAREN)
 			lex->group_depth--;
 
 		// overwrite newline with statement delim token if it is not in

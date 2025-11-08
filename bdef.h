@@ -17,6 +17,7 @@
 /** type casts (a macro highlights casts in the code) */
 #define cast(t, exp)	((t) (exp))
 
+
 #ifdef B_ASSERT
 #include <assert.h>
 #include <stdio.h>  // IWYU pragma: export
@@ -36,6 +37,13 @@
 #define b_assert_expr(c, ...) ((void) 0)
 /** @brief assertion code that can be disabled with a flag */
 #define b_assert(c) ((void) 0)
+#endif
+
+/** for suppressing unused function wargnings */
+#ifdef __GNUC__
+#define b_unused_fn(x) __attribute__((__unused__)) x
+#else
+#define b_unused_fn(x) x
 #endif
 
 
