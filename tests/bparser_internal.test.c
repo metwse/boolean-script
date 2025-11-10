@@ -94,13 +94,13 @@ int main()
 	struct bsymbol *expr2_bit = new_nt_node(expr2_atom, BNT_BIT);
 	new_tk_node(expr2_bit, BTK_FALSE);
 
-	b_umem out_len;
-	struct btoken *out = NULL;
-	teardown_tree(stmts, &out, &out_len);
+	struct b_parser p;
+	b_parser_init(&p);
+	teardown_tree(&p, stmts);
 
 	for (b_umem i = 0; i < sizeof(tk) / sizeof(struct btoken); i++) {
-		b_assert_expr(tk[i].ty == out[i].ty, "tree teardown failed");
+		b_assert_expr(tk[i].ty == p.tokens[i].ty, "tree teardown failed");
 	}
 
-	free(out);
+	free(p.tokens);
 }

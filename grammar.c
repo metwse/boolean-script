@@ -9,8 +9,8 @@
 
 // maximum number of variants constructing the same nonterminal
 #define MAX_VARIANT_COUNT 7
-// maximum body length of a rule
-#define MAX_BODY_LENGTH 10
+// maximum body length of a rule, +1 for EOB
+#define MAX_BODY_LENGTH 11
 
 
 /** nonterminal rules */
@@ -47,7 +47,7 @@ struct production {
 
 
 static const struct production
-productions[BNONTERMINAL_COUNT][MAX_VARIANT_COUNT][MAX_BODY_LENGTH + 1 /* +1 for EOB */] = {
+productions[BNONTERMINAL_COUNT][MAX_VARIANT_COUNT][MAX_BODY_LENGTH] = {
 // ===== primitive types ======================================================
 	/* <bit> ::= */ r(
 		TK(TRUE),

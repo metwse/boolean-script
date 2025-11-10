@@ -74,8 +74,8 @@ int main()
 	struct b_parser parser;
 	struct bio bio;
 
-	char buf[1000];
-	fgets(buf, 999, stdin);
+	char buf[1001];
+	fgets(buf, 1000, stdin);
 
 	bio_init(&bio, mock_input_stream,
 		 new_mock_input_stream_state(buf, strlen(buf)));
