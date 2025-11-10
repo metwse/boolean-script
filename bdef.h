@@ -32,11 +32,14 @@
 		assert(c); \
 	}
 #define b_assert(c) c
+#define b_unreachable(c) fprintf(stderr, "unreachable"); assert(0);
 #else
 /** @brief internal assertions for in-house debugging */
 #define b_assert_expr(c, ...) ((void) 0)
 /** @brief assertion code that can be disabled with a flag */
 #define b_assert(c) ((void) 0)
+/** @brief code get into an unreachable branch */
+#define b_unreachable(c) ((void) 0)
 #endif
 
 /** for suppressing unused function wargnings */

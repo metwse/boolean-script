@@ -13,18 +13,18 @@
 int main()
 {
 	struct btoken tk[] = {
-		TK(TY_VEC),
-		TK(LANGLE_BRACKET),
-		TK_DETAIL(POSITIVE_INT, positive_int, 2),
-		TK(RANGLE_BRACKET),
-		TK_DETAIL(IDENT, ident, "a"),
-		TK(EQ),
-		TK(LBRACKET),
-		TK(TRUE),
-		TK(COMMA),
-		TK(FALSE),
-		TK(RBRACKET),
 		TK(SEMI),
+		TK(RBRACKET),
+		TK(FALSE),
+		TK(COMMA),
+		TK(TRUE),
+		TK(LBRACKET),
+		TK(EQ),
+		TK_DETAIL(IDENT, ident, "a"),
+		TK(RANGLE_BRACKET),
+		TK_DETAIL(POSITIVE_INT, positive_int, 2),
+		TK(LANGLE_BRACKET),
+		TK(TY_VEC),
 	};
 
 	struct bsymbol *stmts = new_nt_node(NULL, BNT_STMTS);

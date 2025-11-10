@@ -17,7 +17,6 @@
 enum b_parser_result {
 	BPARSER_READY = 1 /** a tree is ready for consumption */,
 	BPARSER_CONTINUE /** new tokens should be provided */,
-	BPARSER_NOTOKEN /** new input source should be provided */,
 	BPARSERE_NOMATCH
 };
 
