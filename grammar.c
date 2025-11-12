@@ -113,12 +113,12 @@ productions[BNONTERMINAL_COUNT][MAX_VARIANT_COUNT][MAX_BODY_LENGTH] = {
 
 // ===== statements ===========================================================
 	/* <stmt> ::= */ r(
-		NT(VAR_DECL), TK(SEMI),
+		TK(SEMI),
+	or	NT(VAR_DECL), TK(SEMI),
 	or	NT(EXPR_DECL), TK(SEMI),
 	or	NT(ASGN), TK(SEMI),
 	or	NT(CALL), TK(SEMI),
 	or	TK(LCURLY), NT(STMTS), TK(RCURLY),
-	or	TK(SEMI),
 	),
 	/* <stmts> ::= */ ropt(NT(STMT), NT(STMTS)),
 
@@ -136,7 +136,7 @@ productions[BNONTERMINAL_COUNT][MAX_VARIANT_COUNT][MAX_BODY_LENGTH] = {
 		TK(EXPR), NT(IDENT), TK(LPAREN), NT(EXPR_DECL_OPTPARAMS), TK(RPAREN),
 			// "->" "(" <expr_decl_optparams> ")"
 			TK(RARROW), TK(LPAREN), NT(EXPR_DECL_OPTPARAMS), TK(RPAREN),
-			NT(STMTS),
+			NT(STMT),
 	),
 	/* <expr_decl_param> ::= */ r(
 		NT(TY), NT(IDENT),

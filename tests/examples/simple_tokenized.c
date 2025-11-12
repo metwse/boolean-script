@@ -35,7 +35,7 @@ const struct test_case test_cases[] = {
 		TK(RPAREN),
 		TK(RARROW),
 		TK(LPAREN),
-		TK_DETAIL(IDENT, ident, "b"),
+		TK_DETAIL(IDENT, ident, "d"),
 		TK(COMMA),
 		TK(TY_BOOL),
 		TK_DETAIL(IDENT, ident, "e"),

@@ -64,6 +64,11 @@ enum b_lex_result simple_next(struct b_lex *lex, struct btoken *out)
 		if (lex->peek) {
 			input = lex->peek;
 			lex->peek = 0;
+
+			if (input == '-') {
+				out->ty = BTK_RARROW;
+				return BLEXOK;
+			}
 		} else {
 			const char *input_ = bio_read(lex->bio, 1);
 
@@ -96,6 +101,28 @@ enum b_lex_result simple_next(struct b_lex *lex, struct btoken *out)
 					break;
 				}
 			}
+
+		// TODO: More general 2-char punctuation lexer
+		if (input == '-') {
+			const char *input2_ = bio_read(lex->bio, 1);
+
+			if (!input2_)
+				return BLEXE_NO_MATCH;
+
+			char input2 = input2_[0];
+
+			if (input2 == '>') {
+				if (token_len == 0) {
+					out->ty = BTK_RARROW;
+					return BLEXOK;
+				} else {
+					lex->peek = '-';
+					break;
+				}
+			} else {
+				return BLEXE_NO_MATCH;
+			}
+		}
 
 		// transfer break from inner loop TK_OR -> TK_STMT_DELIM to
 		// outer for loop.
@@ -150,7 +177,7 @@ enum b_lex_result simple_next(struct b_lex *lex, struct btoken *out)
 			return BLEXE_INTEGER_TOO_LARGE;
 		}
 	} else if (token_len && valid_ident) {
-		for (int i = BTK_RARROW; i <= BTK_RETURN; i++) {
+		for (int i = BTK_TY_BOOL; i <= BTK_RETURN; i++) {
 			if (strcmp(btokens[i], token_string) == 0) {
 				out->ty = i;
 				return BLEXOK;
