@@ -46,7 +46,7 @@ void *b_parser_setinput(struct b_parser *p, struct bio *bio)
 void push_child(struct bsymbol *parent, struct bsymbol *child)
 {
 	b_assert_logic(parent->ty == BSYMBOL_NONTERMINAL,
-		       "nonterminal parent expected");
+		       "token as a parent of another symbol");
 
 	b_assert_expr(parent->nt.child_count < child_cap_of(parent->nt.ty),
 		      "child capacity of parent is exceeded");
@@ -87,7 +87,7 @@ struct bsymbol *new_nt_node(struct bsymbol *parent,
 	n->nt.children = malloc(sizeof(struct bsymbol *) * child_cap);
 	n->nt.variant = 0;
 
-	b_assert_logic(child_cap, "a nonterminal with no children is not meaningful");
+	b_assert_logic(child_cap, "a nonterminal with no child");
 	b_assert_mem(n->nt.children);
 
 	return n;
@@ -238,7 +238,7 @@ enum feed_result {
 		return RESTORE;
 	}
 
-	b_unreachable()
+	b_unreachable() // GCOV_EXCL_LINE
 }
 
 enum b_parser_result b_parser_try_next(struct b_parser *p, struct bsymbol *out)

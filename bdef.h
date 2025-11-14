@@ -39,14 +39,22 @@
  * Used for program logic validation, i.e. no non-terminal have 0 child checked
  * using this.
  */
-#define b_assert_logic(c, fmt, ...) b_assert_expr(c, fmt, __VA_ARGS__)
+#define b_assert_logic(c, fmt, ...) \
+	b_assert_expr(c, "logic error: " fmt " is/are not meaningful" \
+		      __VA_OPT__(,)__VA_ARGS__)
 
-/** @brief macro highlights memory allocation checks  */
-#define b_assert_mem(c) b_assert_expr(c, "out of memory")
+/** @brief macro highlights memory allocation checks */
+#define b_assert_mem(c) \
+	b_assert_expr(c, "out of memory")
+
+/** @brief macro highlights boundary checks */
+#define b_assert_boundary(c, fmt, ...) \
+	b_assert_expr(c, fmt __VA_OPT__(,)__VA_ARGS__)
 
 #ifdef B_ASSERT
-/** @brief assertions of expensive checks */
-#define b_assert_agressive(c, fmt, ...) b_assert_expr(c, fmt, __VA_ARGS__)
+/** @brief assertions for expensive checks */
+#define b_assert_agressive(c, fmt, ...) \
+	b_assert_expr(c, fmt __VA_OPT__(,)__VA_ARGS__)
 #else
 #define b_assert_agressive(...) ((void) 0);
 #endif

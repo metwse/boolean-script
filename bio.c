@@ -36,7 +36,7 @@ const char *bio_read(struct bio *bio, b_umem n)
 
 	// restore the character that was in its place before null-terminator
 	if (bio->p < bio->buf.cap && bio->hold_char) {
-		b_buffer_set(bio->buf, bio->p, bio->hold_char);
+		*b_buffer_at(bio->buf, bio->p) = bio->hold_char;
 		bio->hold_char = 0;
 	}
 
@@ -47,8 +47,8 @@ const char *bio_read(struct bio *bio, b_umem n)
 
 		bio->p += n;
 
-		bio->hold_char = b_buffer_at(bio->buf, bio->p);
-		b_buffer_set(bio->buf, bio->p, '\0');
+		bio->hold_char = *b_buffer_at(bio->buf, bio->p);
+		*b_buffer_at(bio->buf, bio->p) = '\0';
 
 		return res;
 	}
@@ -93,7 +93,7 @@ const char *bio_read(struct bio *bio, b_umem n)
 			}
 		}
 
-		res[total_bytes_read] = b_buffer_at(bio->buf, bio->p);
+		res[total_bytes_read] = *b_buffer_at(bio->buf, bio->p);
 		total_bytes_read++;
 		bio->p++;
 	}

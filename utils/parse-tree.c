@@ -51,8 +51,7 @@ void dump_graph_recursive(struct bsymbol *sym, b_umem parent_id, b_umem *uid)
 			case BTK_IDENT:
 				printf("%s", sym->tk.info.ident);
 				break;
-			default:
-				break;
+			default: b_unreachable(); // GCOV_EXCL_LINE
 			}
 			printf("}}\"];\n");
 		} else {
