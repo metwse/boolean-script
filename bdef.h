@@ -9,6 +9,8 @@
 #define BDEF_H
 
 #include <stddef.h>
+#include <assert.h>
+#include <stdio.h>  // IWYU pragma: export
 
 
 /** maximum of two nums */
@@ -18,29 +20,37 @@
 #define cast(t, exp)	((t) (exp))
 
 
-#ifdef B_ASSERT
-#include <assert.h>
-#include <stdio.h>  // IWYU pragma: export
-
-#define bI_assert_stringify_detail(a) #a
-#define bI_assert_stringify(a) bI_assert_stringify_detail(a)
-
-#define b_assert_expr(c, fmt, ...) \
-	if (!(c)) { \
-		fprintf(stderr, "["__FILE__ ":" bI_assert_stringify(__LINE__) "] " fmt "\n"\
-			__VA_OPT__(,)__VA_ARGS__); \
-		assert(c); \
-	}
-#define b_assert(c) c
-#define b_unreachable(c) fprintf(stderr, "unreachable"); assert(0);
-#else
 /** @brief internal assertions for in-house debugging */
-#define b_assert_expr(c, ...) ((void) 0)
-/** @brief assertion code that can be disabled with a flag */
-#define b_assert(c) ((void) 0)
+#define b_assert_expr(c, fmt, ...) do { \
+		if (!(c)) { \
+			fprintf(stderr, fmt __VA_OPT__(,)__VA_ARGS__); \
+			assert(c); \
+		} \
+	} while(0);
+
 /** @brief code get into an unreachable branch */
-#define b_unreachable(c) ((void) 0)
+#define b_unreachable() do { \
+		fprintf(stderr, "reached unreachable branch"); assert(0); \
+	} while (0);
+
+/**
+ * @brief Extra checks for flow of code.
+ *
+ * Used for program logic validation, i.e. no non-terminal have 0 child checked
+ * using this.
+ */
+#define b_assert_logic(c, fmt, ...) b_assert_expr(c, fmt, __VA_ARGS__)
+
+/** @brief macro highlights memory allocation checks  */
+#define b_assert_mem(c) b_assert_expr(c, "out of memory")
+
+#ifdef B_ASSERT
+/** @brief assertions of expensive checks */
+#define b_assert_agressive(c, fmt, ...) b_assert_expr(c, fmt, __VA_ARGS__)
+#else
+#define b_assert_agressive(...) ((void) 0);
 #endif
+
 
 /** for suppressing unused function wargnings */
 #ifdef __GNUC__

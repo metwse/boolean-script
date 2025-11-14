@@ -54,7 +54,7 @@ const char *bio_read(struct bio *bio, b_umem n)
 	}
 
 	char *res = malloc(n + 1);
-	b_assert_expr(res, "nomem");
+	b_assert_mem(res);
 
 	res[n] = '\0';
 
@@ -83,7 +83,7 @@ const char *bio_read(struct bio *bio, b_umem n)
 				// shrink result buffer to read size
 
 				res = realloc(res, total_bytes_read + 1);
-				b_assert_expr(res, "unexpected NULL");
+				b_assert_mem(res);
 
 				res[total_bytes_read] = '\0';
 

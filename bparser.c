@@ -45,8 +45,8 @@ void *b_parser_setinput(struct b_parser *p, struct bio *bio)
 
 void push_child(struct bsymbol *parent, struct bsymbol *child)
 {
-	b_assert_expr(parent->ty == BSYMBOL_NONTERMINAL,
-		      "nonterminal parent expected");
+	b_assert_logic(parent->ty == BSYMBOL_NONTERMINAL,
+		       "nonterminal parent expected");
 
 	b_assert_expr(parent->nt.child_count < child_cap_of(parent->nt.ty),
 		      "child capacity of parent is exceeded");
@@ -63,7 +63,7 @@ void restore_token(struct b_parser *p, struct btoken tk)
 		p->tokens = realloc(p->tokens,
 				    sizeof(struct btoken) * (p->token_count + 1));
 	}
-	b_assert_expr(p->tokens, "nomem");
+	b_assert_mem(p->tokens);
 
 	p->tokens[p->token_count] = tk;
 	p->token_count++;
@@ -73,7 +73,7 @@ struct bsymbol *new_nt_node(struct bsymbol *parent,
 			    enum bnt_type ty)
 {
 	struct bsymbol *n = malloc(sizeof(struct bsymbol));
-	b_assert_expr(n, "nomem");
+	b_assert_mem(n);
 
 	n->parent = parent;
 	if (parent)
@@ -84,12 +84,11 @@ struct bsymbol *new_nt_node(struct bsymbol *parent,
 	b_umem child_cap = child_cap_of(ty);
 	n->nt.ty = ty;
 	n->nt.child_count = 0;
+	n->nt.children = malloc(sizeof(struct bsymbol *) * child_cap);
 	n->nt.variant = 0;
-	b_assert_expr(child_cap, "a nonterminal with no children is not meaningful");
-	b_assert_expr((
-		n->nt.children =
-			malloc(sizeof(struct bsymbol *) * child_cap)
-	), "nomem");
+
+	b_assert_logic(child_cap, "a nonterminal with no children is not meaningful");
+	b_assert_mem(n->nt.children);
 
 	return n;
 }
@@ -98,7 +97,7 @@ struct bsymbol *new_tk_node(struct bsymbol *parent,
 			    enum btk_type ty)
 {
 	struct bsymbol *n = malloc(sizeof(struct bsymbol));
-	b_assert_expr(n, "nomem");
+	b_assert_mem(n);
 
 	n->parent = parent;
 	if (parent)
@@ -135,9 +134,6 @@ void next_variant(struct b_parser *p)
 			break;
 	}
 
-	for (b_umem i = p->cur->nt.child_count; i > 0; i--)
-		teardown_tree_preorder(p, p->cur->nt.children[i - 1]);
-
 	p->cur->nt.variant++;
 	p->cur->nt.child_count = 0;
 }
@@ -157,25 +153,11 @@ struct btoken next_token(struct b_parser *p)
 	return out;
 }
 
-void teardown_tree_postorder(struct b_parser *p, struct bsymbol *sym)
+void teardown_tree(struct b_parser *p, struct bsymbol *sym)
 {
 	if (sym->ty == BSYMBOL_NONTERMINAL) {
 		for (b_umem i = sym->nt.child_count; i > 0; i--)
-			teardown_tree_postorder(p, sym->nt.children[i - 1]);
-
-		if (sym->nt.children)
-			free(sym->nt.children);
-	} else {
-		restore_token(p, sym->tk);
-	}
-	free(sym);
-}
-
-void teardown_tree_preorder(struct b_parser *p, struct bsymbol *sym)
-{
-	if (sym->ty == BSYMBOL_NONTERMINAL) {
-		for (b_umem i = 0; i < sym->nt.child_count; i++)
-			teardown_tree_preorder(p, sym->nt.children[i]);
+			teardown_tree(p, sym->nt.children[i - 1]);
 
 		if (sym->nt.children)
 			free(sym->nt.children);
@@ -199,7 +181,7 @@ void backtrace(struct b_parser *p)
 	}
 
 	for (b_umem i = parent->nt.child_count; i > this_i; i--)
-		teardown_tree_postorder(p, parent->nt.children[i - 1]);
+		teardown_tree(p, parent->nt.children[i - 1]);
 	parent->nt.child_count = this_i;
 
 	p->cur = parent;

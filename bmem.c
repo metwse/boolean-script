@@ -17,7 +17,7 @@ void b_buffer_with_cap(struct b_buffer *buf, b_umem cap)
 	if (cap) {
 		buf->b = malloc(cap);
 
-		b_assert_expr(buf->b, "malloc should not return NULL");
+		b_assert_mem(buf->b);
 	} else {
 		buf->b = NULL;
 	}
@@ -42,5 +42,5 @@ void b_buffer_resize(struct b_buffer *buf, b_umem cap)
 	buf->b = buf->cap == 0 ? malloc(cap) : realloc(buf->b, cap);
 	buf->cap = cap;
 
-	b_assert_expr(buf->b, "realloc should not return NULL");
+	b_assert_mem(buf->b);
 }
