@@ -1,8 +1,10 @@
 /**
  * @file bast.h
- * @brief Abstract syntax tree
+ * @brief Abstract Syntax Tree (AST)
  *
- * Definitions for Boolean script abstract syntax tree.
+ * Defines the semantic structure of the Boolean script language. This tree is
+ * the target output of a CST-to-AST transformation (from `bsymbol` tree in
+ * `bgrammar.h`).
  */
 
 #ifndef BAST_H

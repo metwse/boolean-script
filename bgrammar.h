@@ -1,6 +1,20 @@
 /**
  * @file bgrammar.h
- * @brief Definitions for Boolen script context-free grammar.
+ * @brief Boolean script Context-Free Grammar (CFG) and Concrete Syntax Tree
+ * (CST) definitions.
+ *
+ * This file defines two main components:
+ * 1. The list of terminal (`BTOKENS`) and non-terminal (`BNONTERMINALS`)
+ *    symbols that make up the language's grammar.
+ * 2. The `bsymbol` struct, which is the node type for the CST produced by
+ *    `b_parser`.
+ *
+ * See @ref grammar.c to context-free grammar definition.
+ *
+ * @note The `bsymbol` (CST) is a detailed, literal representation of the
+ * source code, including all syntax (parentheses, operators, etc.). It should
+ * be transformed into a cleaner Abstract Syntax Tree (AST) (defined in
+ * `bast.h`) for interpretation.
  */
 
 #ifndef BGRAMMAR_H
@@ -10,7 +24,7 @@
 
 
 /**
- * Macro for defining types related with tokens.
+ * @brief Macro for defining types related with tokens.
  *
  * A macro named "x" must be defined to process those nonterminals.
  */
@@ -41,7 +55,7 @@
 #define BTOKEN_COUNT 27
 
 /**
- * Macro for defining types related with nonterminals.
+ * @brief Macro for defining types related with nonterminals.
  *
  * A macro named "x" must be defined to process those nonterminals.
  */
@@ -142,16 +156,28 @@ struct bnonterminal {
 		#define x(t) BNT_ ## t
 		BNONTERMINALS,
 		#undef x
-	} ty /** type of the nonterminal */;
+	} ty /** Type of the nonterminal */;
 
 	struct bsymbol **children /** child nodes */;
 	b_umem child_count /** child node count */;
 
-	/** nonterminal production variant */
+	/** @brief The production rule variant being parsed
+	 *
+	 * This field is for the internal use of the `b_parser`. When the
+	 * backtracking parser tries different production rules for a
+	 * non-terminal (e.g., `<atom> ::= "(" <expr> ")" | <call> ...`), it
+	 * increments this index to track which variant it is currently
+	 * attempting. This is purely parse-time data. */
 	b_umem variant;
 };
 
-/** @brief terminal or nonterminal token */
+/**
+ * @brief A node in the Concrete Syntax Tree (CST).
+ *
+ * `bsymbol` is a tagged union that can represent either:
+ * 1. A Non-Terminal (an internal node, e.g., `<expr>`, `<stmt>`)
+ * 2. A Token (a terminal/leaf node, e.g., `+`, `my_var`)
+ */
 struct bsymbol {
 	union {
 		/** nonterminal type of symbol */
@@ -160,13 +186,15 @@ struct bsymbol {
 		struct btoken tk;
 	};
 
-	/** @brief symbol type */
+	/** @brief The type of `bsymbol` (the union's tag) */
 	enum bsymbol_type {
 		BSYMBOL_NONTERMINAL,
 		BSYMBOL_TOKEN,
 	} ty /** type of the symbol */;
 
-	struct bsymbol *parent /** parent nonterminal */;
+	/** A back-pointer to the parent node in the tree. This is NULL for the
+	 * root node. */
+	struct bsymbol *parent;
 };
 
 

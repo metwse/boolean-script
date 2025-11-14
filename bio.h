@@ -13,12 +13,16 @@
 
 
 /**
- * A trait in function form that wraps a token stream input, reads it into a
- * buffer.
+ * @brief A reader trait callback for the bio struct.
  *
- * @param[additional_data] Auxiliary state storage for underlying buffer.
+ * The function type defines a strategy for filling the `bio` buffer when it
+ * runs out of data. It is called by `bio_read` when more characters are
+ * needed.
  *
- * @returns number of read bytes
+ * @param buf The buffer to be filled
+ * @param additional_data An opaque pointer to the reader's state, (e.g., a
+ *                        FILE * handle)
+ * @returns The number of bytes read into the buffer
  */
 typedef b_umem (*bio_reader)(struct b_buffer *buf, void *additional_data);
 
@@ -27,10 +31,8 @@ struct bio {
 	/** position in the `buf` */
 	b_umem p;
 
-	/**
-	 * If null-termination of a slice replaces char in the buffer, the char
-	 * will be stored in this field to read next chunk.
-	 */
+	/** If null-termination of a slice replaces char in the buffer, the
+	 * char will be stored in this field to read next chunk. */
 	char hold_char;
 
 	b_byte *prev_buf /** buffer returned in previous read */;

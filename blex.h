@@ -33,13 +33,16 @@ enum b_lex_result {
 /**
  * @brief Lexer state
  *
- * State of the lexeme scanner.
+ * Holds the state of the lexeme scanner.
  */
 struct b_lex {
-	struct bio *bio /** input stream */;
-	char peek /** a char that broke previous token */;
-	enum btk_type lookahead /** field simple lookahead checking */;
-	/** depth of the parentheses, used for ignoring newline  */
+	struct bio *bio /** The input stream */;
+	/** A character that was part of the input stream but not consumed by
+	 * the previous token. (e.g., the `+` in `a+b`). */
+	char peek;
+	enum btk_type lookahead /** A simple one-token lookahead. */;
+	/** Parentheses nesting depth. Used to ignore newlines (BTK_NEWLINE)
+	 * when inside parentheses '()' or blocks '{}'. */
 	b_umem group_depth;
 };
 

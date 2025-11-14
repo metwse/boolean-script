@@ -1,51 +1,102 @@
+/**
+ * @file grammar.c
+ * @brief Context-free grammar definition for the BS parser.
+ *
+ * This file is not a standard, independently compiled C file. It is designed
+ * to be directly `#include`'d into the parser implementation `bparser.c`.
+ *
+ * 1. Defines the 'productions' table: A static array that represents the
+ *    complete context-free grammar of the language as data.
+ * 2. Provides macros (r, rrr, ropt) to define these production rules in a
+ *    readable way.
+ * 3. Provides 'static inline' helper functions (child_cap_of
+ *    variant_count_of) that query this 'productions' table to configure the
+ *    parser engine at runtime.
+ */
+
 #include "bdef.h"
 #include "bgrammar.h"
 
 #include <stdbool.h>
 
+ /** integer representing EOB (end of body) */
+#define EOB -1
+ /** integer representing EOC (end of construct) */
+#define EOC -2
 
-#define EOB -1 /* integer representing EOB */
-#define EOC -2 /* integer representing EOC */
-
-// maximum number of variants constructing the same nonterminal
+/** maximum number of variants constructing the same nonterminal */
 #define MAX_VARIANT_COUNT 7
-// maximum body length of a rule, +1 for EOB
+/** maximum body length of a rule, +1 for EOB */
 #define MAX_BODY_LENGTH 11
 
 
-/** nonterminal rules */
+/**
+ * @brief A single symbol within a production rule.
+ *
+ * 1. A terminal symbol (Token)
+ * 2. A non-terminal symbol (Grammar rule)
+ * 3. A sentinel value (EOB or EOC)
+ */
 struct production {
-	enum bsymbol_type ty /** whether the symbol is a terminal or not */;
+	enum bsymbol_type ty /** The symbol's type (tag for the union) */;
 	union {
-		enum btk_type tk_ty;
-		enum bnt_type nt_ty;
-		int end;
+		enum btk_type tk_ty /** token type */;
+		enum bnt_type nt_ty /** nonterminal type */;
+		int end /** a sentinel value (EOB or EOC) */;
 	};
 };
 
 
-#define SEOB (const struct production) { .end = EOB } /* end of body */
-#define SEOC { { .end = EOC } } /* end of construct */
+/** @brief Sentinel struct for the end of a rule's body (EOB) */
+#define SEOB (const struct production) { .end = EOB }
+/** @brief Sentinel struct for the end of a construct's variants (EOC) */
+#define SEOC { { .end = EOC } }
 
+/** @brief Macro to create a terminal (Token) production symbol. */
 #define TK(tk) { .ty = BSYMBOL_TOKEN, .tk_ty = BTK_ ## tk }
+/** @brief Macro to create a non-terminal production symbol. */
 #define NT(nt) { .ty = BSYMBOL_NONTERMINAL, .nt_ty = BNT_ ## nt }
 
 
-/** rule */
+/** @brief Macro to define a standard grammar rule. */
 #define r(...) { { __VA_ARGS__ SEOB }, SEOC }
 
-/** right-recursive list rules */
+/**
+ * @brief Macro to define a pair of rules for a right-recursive list.
+ *
+ * This is the standard pattern for lists and operator precedence. It
+ * automatically defines the rule for 'head' and 'head_REST'.
+ *
+ * For example, `rrr(EXPR_LS, EXPR, COMMA)` defines:
+ * 1. `<expr_ls> ::= <expr> <expr_ls_rest>`
+ * 2. `<expr_ls_rest> ::= "," <expr_ls> <expr_ls_rest> | E`
+ *
+ * @param head The base non-terminal.
+ * @param listelem The non-terminal for the list element.
+ * @param delim The token used as a separator.
+ */
 #define rrr(head, listelem, delim) \
 	{ { NT(listelem), NT(head ## _REST), SEOB }, SEOC }, \
 	{ { TK(delim), NT(head), NT(head ## _REST), SEOB }, { SEOB }, SEOC }
 
-/** optional rules */
+/**
+ * @brief Macro to define an optional grammar rule (epsilon production).
+ *
+ * This is a shortcut for a rule with two variants:
+ * 1. The symbols provided in `__VA_ARGS__`
+ * 2. An empty (epsilon) production
+ */
 #define ropt(...) { { __VA_ARGS__, SEOB }, { SEOB }, SEOC }
 
-/** array delimiter for the sake of clarity */
+/**
+ * @brief Macro for syntactic sugar to separate variants in an 'r' macro.
+ *
+ * Expands to the end-of-body sentinel and new variant syntax.
+ */
 #define or SEOB, }, {
 
 
+/* The complete, context-free grammar for the language. */
 static const struct production
 productions[BNONTERMINAL_COUNT][MAX_VARIANT_COUNT][MAX_BODY_LENGTH] = {
 // ===== primitive types ======================================================

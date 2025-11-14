@@ -21,10 +21,16 @@ struct b_buffer {
 	b_umem cap /** buffer capacity */;
 };
 
-/** @brief zero-cost array wrapper */
+/**
+ * @brief A type-agnostic stack built on top of a b_buffer.
+ *
+ * The stack grows in chunks of `B_STACK_CHUNK_SIZE`. Elements are pushed and
+ * popped as raw bytes, similar to a memcpy. The 'len' field tracks the number
+ * of bytes, not the number of elements.
+ */
 struct b_stack {
-	struct b_buffer buf /** underlying buffer */;
-	b_umem len /** elements count in stack */;
+	struct b_buffer buf /** The underlying byte buffer */;
+	b_umem len /** Number of bytes in the stack */;
 };
 
 

@@ -2,7 +2,7 @@
  * @file bdef.h
  * @brief Basic definitions.
  *
- * Limits, basic types, and some other definitions
+ * Limits, basic types, and platform-abstraction definitions.
  */
 
 #ifndef BDEF_H
@@ -69,8 +69,11 @@
 
 
 /**
- * @brief 'b_mem' is a signed integer big enough to count the total memory used
- * by BS.
+ * @brief An unsigned integer large enough to count all memory used by BS.
+ *
+ * 'b_umem' (unsigned long long) guarantees a 64-bit width, even on
+ * 32-bit platforms where 'size_t' would only be 32-bit. This ensures
+ * consistent memory counting and addressing capabilities.
  */
 typedef unsigned long long b_umem;
 /**
