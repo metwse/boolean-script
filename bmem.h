@@ -11,7 +11,8 @@
 #include "bdef.h"
 
 
-#define B_STACK_CHUNK_SIZE 32
+/** @brief stack will grow in that size if elements cannot fit in it */
+#define B_STACK_CHUNK_SIZE 96
 
 
 /** @brief zero-cost array wrapper */

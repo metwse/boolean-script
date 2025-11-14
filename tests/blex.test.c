@@ -73,19 +73,22 @@ int main()
 
 	b_lex_init(&lex);
 
+	for (b_umem i = 0; i < sizeof(test_cases) / sizeof(struct test_case); i++)
+		test_valid(&lex, test_cases[i]);
+
 	const char *invalid_tokenstreams[] = {
 		"long_identifier_aaaaaaaaaaaaaaaaa also this tests memory leak in terminated streams",
 		"12345678901",
 		"ınvâlıd",
+		"a-a",
+		"a-",
 		"\\not newline",
 	};
-
-	for (b_umem i = 0; i < sizeof(test_cases) / sizeof(struct test_case); i++)
-		test_valid(&lex, test_cases[i]);
-
 
 	test_invalid(&lex, invalid_tokenstreams[0], BLEXE_IDENT_TOO_LONG);
 	test_invalid(&lex, invalid_tokenstreams[1], BLEXE_INTEGER_TOO_LARGE);
 	test_invalid(&lex, invalid_tokenstreams[2], BLEXE_NO_MATCH);
-	test_invalid(&lex, invalid_tokenstreams[3], BLEXE_INVALID_ESCAPE_CHAR);
+	test_invalid(&lex, invalid_tokenstreams[3], BLEXE_NO_MATCH);
+	test_invalid(&lex, invalid_tokenstreams[4], BLEXE_NO_MATCH);
+	test_invalid(&lex, invalid_tokenstreams[5], BLEXE_INVALID_ESCAPE_CHAR);
 }

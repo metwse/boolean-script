@@ -51,8 +51,8 @@
 #define b_assert_boundary(c, fmt, ...) \
 	b_assert_expr(c, fmt __VA_OPT__(,)__VA_ARGS__)
 
-#ifdef B_ASSERT
 /** @brief assertions for expensive checks */
+#ifdef B_ASSERT
 #define b_assert_agressive(c, fmt, ...) \
 	b_assert_expr(c, fmt __VA_OPT__(,)__VA_ARGS__)
 #else

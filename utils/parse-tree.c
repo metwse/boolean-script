@@ -6,6 +6,7 @@
 #include "../bparser.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "common.h"
@@ -82,8 +83,17 @@ int main()
 	b_parser_init(&parser);
 	b_parser_setinput(&parser, &bio);
 
-	struct bsymbol stmt;
-	b_parser_try_next(&parser, &stmt);
+	b_parser_start(&parser, BNT_STMT);
 
-	dump_graph(&stmt);
+	struct bsymbol *stmt = NULL;
+	enum b_parser_result res = b_parser_continue(&parser, &stmt);
+
+	if (stmt) {
+		if (res == BPARSER_READY)
+			dump_graph(stmt);
+
+		b_parser_destroy_tree(stmt);
+	}
+
+	free(b_parser_clearinput(&parser));
 }

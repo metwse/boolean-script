@@ -60,10 +60,11 @@ const struct test_case test_cases[] = {
 	},
 },
 {
-	.str = "bool_long_identifier_aaaaaaaaaaa \\\n"
+	.str = "bool_long_identifier_aaaaaaaaaaa-> \\\n"
 		"= 1;",
 	.tk = {
 		TK_DETAIL(IDENT, ident, "bool_long_identifier_aaaaaaaaaaa"),
+		TK(RARROW),
 		TK(EQ),
 		TK(TRUE),
 		TK(SEMI),
